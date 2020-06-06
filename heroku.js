@@ -91,11 +91,11 @@ app.get('/' , function(req , res){
   res.end();
 })
 
-// We are receiving updates at the route below!
-app.post(`/bot${TOKEN}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
+// // We are receiving updates at the route below!
+// app.post(`/bot${TOKEN}`, (req, res) => {
+//   bot.processUpdate(req.body);
+//   res.sendStatus(200);
+// });
 
 // Start Express Server
 app.listen(port, () => {
