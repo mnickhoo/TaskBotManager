@@ -1,23 +1,24 @@
 require('dotenv/config');
-const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
-const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
-const chanel_id = process.env.chanel_id ; 
-const express = require('express'); //we use express module
-const bodyParser = require('body-parser');
-const {projectModel} = require('./model/projectModel');
-const {freelancerModel} = require('./model/freelancerModel');
-const taskManager = require('./Services/ProjectService');
-const freelancerService = require('./Services/freelancerService');
-var url = require('url'); //Url Module
-var fs = require('fs'); // file System
-const TelegramBot = require('node-telegram-bot-api'); //use telegram API
+// const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
+// const chanel_id = process.env.chanel_id ; 
+// const express = require('express'); //we use express module
+// const bodyParser = require('body-parser');
+// const {projectModel} = require('./model/projectModel');
+// const {freelancerModel} = require('./model/freelancerModel');
+// const taskManager = require('./Services/ProjectService');
+// const freelancerService = require('./Services/freelancerService');
+// var url = require('url'); //Url Module
+// var fs = require('fs'); // file System
 
-const app = express();
-app.use(bodyParser.json());
+// const app = express();
+// app.use(bodyParser.json());
 
 
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api'); //use telegram API
+const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+
 const options = {
   webHook: {
     port: process.env.PORT
