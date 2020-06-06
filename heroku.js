@@ -1,12 +1,6 @@
-/**
- * This example demonstrates setting up webhook
- * on the Heroku platform.
- */
 require('dotenv/config');
 const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
 const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
-// const url_local = 'https://d7a8fd604e95.ngrok.io'; //for localhost
-// const port = 2020; //we use port on 2020 http://localhost://2020
 const chanel_id = process.env.chanel_id ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
