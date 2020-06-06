@@ -1,0 +1,16 @@
+{
+  "name": "taskbot",
+  "version": "1.0.0",
+  "description": "somthing else",
+  "main": "app.js",
+  "scripts": {
+    "test": "app.js" , 
+    "start": "heroku.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.50.0"
+  }
+}
