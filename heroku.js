@@ -3,10 +3,11 @@ const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
 const chanel_id = process.env.chanel_id ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-// const {projectModel} = require('./model/projectModel');
-// const {freelancerModel} = require('./model/freelancerModel');
-// const taskManager = require('./Services/ProjectService');
-// const freelancerService = require('./Services/freelancerService');
+const port = process.env.PORT; 
+const {projectModel} = require('./model/projectModel');
+const {freelancerModel} = require('./model/freelancerModel');
+const taskManager = require('./Services/ProjectService');
+const freelancerService = require('./Services/freelancerService');
 var url = require('url'); //Url Module
 var fs = require('fs'); // file System
 
@@ -62,7 +63,7 @@ app.get('/insert', function(req , res){
     if(q.query.title != null){
       //initiate to project object
 
-      let newProject = new project({
+      let newProject = new projectModel({
           title : q.query.title , 
           description : q.query.description, 
           linkInfo : q.query.linkInfo , 
@@ -89,3 +90,14 @@ app.get('/' , function(req , res){
   res.write("salam :)");
   res.end();
 })
+
+// We are receiving updates at the route below!
+app.post(`/bot${TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+// Start Express Server
+app.listen(port, () => {
+  console.log(`Bot server's listening on ${port}`);
+});

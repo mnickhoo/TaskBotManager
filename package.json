@@ -2,7 +2,7 @@
   "name": "taskbot",
   "version": "1.0.0",
   "description": "somthing else",
-  "main": "app.js",
+  "main": "heroku.js",
   "scripts": {
     "test": "heroku.js",
     "start": "node heroku.js"

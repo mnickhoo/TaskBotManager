@@ -1,4 +1,4 @@
-require('dotenv').config(); //Add .env 
+require('dotenv/config');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
 var http = require('http'); 
 const mongoose = require('../db/mongoose');
@@ -8,7 +8,7 @@ const token = process.env.TELEGRAM_TOKEN //Set Token
 var chanel_id = process.env.CHANEL_ID ; 
 const options = {
     webHook: {
-      port: 80
+      port: process.env.port
     }
 };
 var bot = new TelegramBot(token , options); 
