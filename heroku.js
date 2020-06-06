@@ -43,7 +43,7 @@ bot.on('message', function onMessage(msg) {
   }else if (text == "mahdi"){
     bot.sendMessage(msg.chat.id, 'my father is mahdi :D');
   }else{
-    bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
+    // bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
   }
 });
 
