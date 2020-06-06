@@ -97,7 +97,7 @@ app.get('/' , function(req , res){
 //   res.sendStatus(200);
 // });
 
-// Start Express Server
-app.listen(port, () => {
-  console.log(`Bot server's listening on ${port}`);
-});
+// // Start Express Server
+// app.listen(port, () => {
+//   console.log(`Bot server's listening on ${port}`);
+// });
