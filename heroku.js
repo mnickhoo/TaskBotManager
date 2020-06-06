@@ -41,36 +41,36 @@ bot.on('message', function onMessage(msg) {
 
 
 
-app.get('/insert', function(req , res){
-  var q = url.parse(req.url, true); //get url 
-  var filename = "./views/insert.html" //find fileName
-  fs.readFile(filename,function(err, data) {
-    if(err) {
-      res.writeHead(404,{'Content-Type': 'text/html'});
-      return res.end("404 Not Found");
-    } //Error 404 not Found
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    if(q.query.title != null){
-      //initiate to project object
+// app.get('/insert', function(req , res){
+//   var q = url.parse(req.url, true); //get url 
+//   var filename = "./views/insert.html" //find fileName
+//   fs.readFile(filename,function(err, data) {
+//     if(err) {
+//       res.writeHead(404,{'Content-Type': 'text/html'});
+//       return res.end("404 Not Found");
+//     } //Error 404 not Found
+//     res.writeHead(200, {'Content-Type': 'text/html'});
+//     if(q.query.title != null){
+//       //initiate to project object
 
-      let newProject = new project({
-          title : q.query.title , 
-          description : q.query.description, 
-          linkInfo : q.query.linkInfo , 
-          expireDate : q.query.expireDate, 
-          point : q.query.point
-      }); 
-      //save to db 
-      newProject.save().then((project)=>{
-          //send project to channel
-          taskManager.SendToChannel(chanel_id , project); //send Task to Channel  
+//       let newProject = new project({
+//           title : q.query.title , 
+//           description : q.query.description, 
+//           linkInfo : q.query.linkInfo , 
+//           expireDate : q.query.expireDate, 
+//           point : q.query.point
+//       }); 
+//       //save to db 
+//       newProject.save().then((project)=>{
+//           //send project to channel
+//           taskManager.SendToChannel(chanel_id , project); //send Task to Channel  
 
-          console.log("project has been saved." , project);     
-      },(err) =>{
-          console.log("project unable to save on db", err);
-      });
-    }
-    res.write(data); //return view
-    return res.end();
-  });
-});
+//           console.log("project has been saved." , project);     
+//       },(err) =>{
+//           console.log("project unable to save on db", err);
+//       });
+//     }
+//     res.write(data); //return view
+//     return res.end();
+//   });
+// });
