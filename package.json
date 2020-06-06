@@ -4,8 +4,8 @@
   "description": "somthing else",
   "main": "app.js",
   "scripts": {
-    "test": "app.js",
-    "start": "node app.js"
+    "test": "heroku.js",
+    "start": "node heroku.js"
   },
   "author": "",
   "license": "ISC",
