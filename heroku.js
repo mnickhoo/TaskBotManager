@@ -5,9 +5,9 @@ const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
 const port = process.env.PORT; 
 const {projectModel} = require('./model/projectModel');
-const {freelancerModel} = require('./model/freelancerModel');
-const taskManager = require('./Services/ProjectService');
-const freelancerService = require('./Services/freelancerService');
+// const {freelancerModel} = require('./model/freelancerModel');
+// const taskManager = require('./Services/ProjectService');
+// const freelancerService = require('./Services/freelancerService');
 var url = require('url'); //Url Module
 var fs = require('fs'); // file System
 
