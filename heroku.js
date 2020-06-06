@@ -38,9 +38,10 @@ bot.setWebHook(`${urlConfig}/bot${TOKEN}`);
 bot.on('message', function onMessage(msg) {
   var chatId = msg.chat.id; //get chatId
   var text = msg.text; //get Message or Command
-  bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
   if(text == "/maysam"){
     bot.sendMessage("hello maysam :)");
+  }else{
+    bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
   }
 });
 
