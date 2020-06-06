@@ -1,12 +1,12 @@
 require('dotenv/config');
-// const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
+const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
 const chanel_id = process.env.chanel_id ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-// const {projectModel} = require('./model/projectModel');
-// const {freelancerModel} = require('./model/freelancerModel');
-// const taskManager = require('./Services/ProjectService');
-// const freelancerService = require('./Services/freelancerService');
+const {projectModel} = require('./model/projectModel');
+const {freelancerModel} = require('./model/freelancerModel');
+const taskManager = require('./Services/ProjectService');
+const freelancerService = require('./Services/freelancerService');
 var url = require('url'); //Url Module
 var fs = require('fs'); // file System
 
