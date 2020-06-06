@@ -83,3 +83,9 @@ app.get('/insert', function(req , res){
     return res.end();
   });
 });
+
+app.get('/' , function(req , res){
+  res.writeHead(200 , {'Content-Type': 'text/html'}); 
+  res.write("salam :)");
+  res.end();
+})
