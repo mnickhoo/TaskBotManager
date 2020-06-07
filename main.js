@@ -120,6 +120,6 @@ app.listen(port, () => {
   });
   
 
-var sendMessage = function(chatId , Message){
-    bot.sendMessage(chatId , message); 
-}
+// var sendMessage = function(chatId , Message){
+//     bot.sendMessage(chatId , message); 
+// }

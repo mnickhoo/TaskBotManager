@@ -24,8 +24,13 @@ let freelancerModel = mongoose.model('freelancer' , {
     },
     isMojaz:{
         type : Boolean
+    },
+    lastCommand : {
+        type : String , 
+        default : null
     }
 });
+
 
 
 module.exports = {

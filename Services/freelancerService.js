@@ -3,35 +3,41 @@ const {freelancerModel} = require('../model/freelancerModel');
 
 var freelancerService = {
      isRegistered :function(chatId){
-        freelancerModel.count({chatId : chatId} , (err , count)=>{
-            if(err){
-                throw err; //throw error
-            }
-            if(count>0){//freelancer exist on db 
-              console.log("is registered!")
-              return true ; 
-            } else{
-                //user must be register on db
-                console.log("is not registered!")
-                return false;
-              }
-        });
+         return new Promise((resolve , reject)=>{
+            freelancerModel.count({chatId : chatId} , (err , count)=>{
+                if(err){
+                    throw err; //throw error
+                }
+                if(count>0){//freelancer exist on db 
+                  resolve(true)  ; 
+                } else{
+                    //user must be register on db
+                    resolve(false) ;
+                  }
+            });
+         })
      }, 
     registerFreelancer : function(freelancer){
-        let newFreelancer = new freelancerModel({
-            name : freelancer.name , 
-            family : freelancer.family , 
-            chatId : freelancer.chatId , 
-            sheba  : null , 
-            skills : null , 
-            project : null , 
-            isMojaz : true
-        });
-        newFreelancer.save().then((freelancer) => {
-            return true ; 
-        } , (err) => {
-            throw err ; 
-        });
+        return new Promise((resolve,reject)=>{
+            let newFreelancer = new freelancerModel({
+                name : freelancer.name , 
+                family : freelancer.family , 
+                chatId : freelancer.chatId , 
+                sheba  : null , 
+                skills : null , 
+                project : null , 
+                isMojaz : true
+            });
+            newFreelancer.save().then((freelancer) => {
+                if(freelancer._id != null){
+                    resolve(true);
+                }else{
+                    resolve(false);
+                }
+            } , (err) => {
+                throw err ; 
+            });
+        })
     } , 
     findAndUpdateFreelancer : function(chatId , task){
        let freelancer = freelancerModel.findOneAndUpdate({
@@ -42,6 +48,31 @@ var freelancerService = {
             console.log(err)
         })
         return freelancer;
+    }, 
+    hasLastCommand : function(chatId){
+        return new Promise((resolve, reject)=>{
+            freelancerModel.findOne({
+                chatId : chatId
+            }).then((freelancer)=> {
+                let check =  freelancer.lastCommand != null ;
+                resolve(check); 
+            });
+        })   
+    },
+    updateLastCommmand : function(chatId,lastCommand){
+        return new Promise((resolve,reject)=>{
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            },{
+                $set:{
+                    lastCommand : lastCommand
+                }
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                console.log(err);
+            })
+        });
     }
 }
 

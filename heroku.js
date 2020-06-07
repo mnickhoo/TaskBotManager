@@ -4,16 +4,15 @@ const chanel_id = process.env.chanel_id ;
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
 const port = process.env.PORT; 
-// const {projectModel} = require('./model/projectModel');
-// const {freelancerModel} = require('./model/freelancerModel');
-// const taskManager = require('./Services/ProjectService');
-// const freelancerService = require('./Services/freelancerService');
+const {projectModel} = require('./model/projectModel');
+const {freelancerModel} = require('./model/freelancerModel');
+const taskManager = require('./Services/ProjectService');
+const freelancerService = require('./Services/freelancerService');
 var url = require('url'); //Url Module
 var fs = require('fs'); // file System
 
 const app = express();
 app.use(bodyParser.json());
-
 
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
@@ -23,33 +22,17 @@ const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwz
 const options = {
   webHook: {
     port: process.env.PORT
+    // port : 2020
   }
 };
 
 const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
+// const urlConfig = "https://ec8408f47e04.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
-
 
 // This informs the Telegram servers of the new webhook.
 // Note: we do not need to pass in the cert, as it already provided
 bot.setWebHook(`${urlConfig}/bot${TOKEN}`);
-
-
-// Just to ping!
-bot.on('message', function onMessage(msg) {
-  var chatId = msg.chat.id; //get chatId
-  var text = msg.text; //get Message or Command
-  if(text == "/maysam"){
-    bot.sendMessage(msg.chat.id, "hello maysam :)");
-  }else if (text == "mahdi"){
-    bot.sendMessage(msg.chat.id, 'my father is mahdi :D');
-  }else{
-    // bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
-  }
-});
-
-
-
 
 app.get('/insert', function(req , res){
   var q = url.parse(req.url, true); //get url 
@@ -85,11 +68,104 @@ app.get('/insert', function(req , res){
   });
 });
 
-app.get('/' , function(req , res){
-  res.writeHead(200 , {'Content-Type': 'text/html'}); 
-  res.write("salam :)");
-  res.end();
-})
+app.post(`/bot${TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+// webhook API just to ping!
+bot.on('message', msg => {
+  try {
+      var chatId = msg.chat.id; //get chatId
+      var message = msg.text; //get Message or Command
+      freelancerService.isRegistered(chatId).then((registered)=> { 
+        if(registered){//is user registered!?
+          freelancerService.hasLastCommand(chatId).then((hasLastCommand)=>{
+            if(hasLastCommand){//is user has last commamnd?
+              //PROCESS THE LAST COMAMND 
+
+            }else{//user hasn't last command
+                processTheMessage(chatId,message);  //MESSAGE IS A COMMAND?
+            }
+          })
+          } else{//user must be register on db      
+              let newFreelancer = new freelancerModel({
+                  name : msg.chat.first_name , 
+                  family : msg.chat.last_name , 
+                  chatId : chatId 
+              })
+              freelancerService.registerFreelancer(newFreelancer).then((isRegistered)=>{ //register user in db
+                if(isRegistered){
+                  processTheMessage(chatId,message); //process the command 
+                  bot.sendMessage(chatId , "you are registered!");
+                }
+              })       
+          } 
+      })
+  } catch (error) {
+      console.log(error)
+  }
+});
+
+var sendMessage = function(chatId , message){
+  bot.sendMessage(chatId , message);
+}
+
+var isCommand = function(message){
+    if(message.startsWith("/")){
+      return true;
+    }else{
+      return false;
+    }
+}
+
+var processTheMessage = function(chatId,message){
+  if(isCommand(message)){//is message has a command?
+    switch(message){
+      case "/start":
+        var taskId = message.split(" ")[1];  //pass taskId to get a task from db
+        projectModel.findOne({_id : taskId}).then((task)=>{ //get project selected
+          let myPromise = new Promise((resolve , reject) =>{
+              var freelancer = freelancerService.findAndUpdateFreelancer(chatId , task); //find and assign task to freelancer
+              resolve(freelancer);
+          }).then((freelacer)=> {
+              sendMessage(chatId , `you select project: ${freelancer.project.title}`);
+          });
+        });
+        break;
+      case "/cancell":
+        //set null to last command
+        freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
+          bot.sendMessage(chatId, "the progress has been canceled!")
+        })
+        break;
+      case "/create":
+        freelancerService.updateLastCommmand(chatId,"/title").then(()=>{
+          bot.sendMessage(chatId, "ok send me title of task");
+        })
+        break
+      default:
+        bot.sendMessage(chatId , "command is not defined!");
+    }
+  }else{//message not command
+        bot.sendMessage(chatId , "command is not defined!");
+  }
+}
+
+// // Start Express Server
+// app.listen(port, () => {
+//   console.log(`Bot server's listening on ${port}`);
+// });
+
+// var sendMessage = function(chatId , Message){
+//   bot.sendMessage(chatId , message); 
+// }
+
+// app.get('/' , function(req , res){
+//   res.writeHead(200 , {'Content-Type': 'text/html'}); 
+//   res.write("salam :)");
+//   res.end();
+// })
 
 // // We are receiving updates at the route below!
 // app.post(`/bot${TOKEN}`, (req, res) => {
@@ -100,4 +176,17 @@ app.get('/' , function(req , res){
 // // Start Express Server
 // app.listen(port, () => {
 //   console.log(`Bot server's listening on ${port}`);
+// });
+
+// // Just to ping!
+// bot.on('message', function onMessage(msg) {
+//   var chatId = msg.chat.id; //get chatId
+//   var text = msg.text; //get Message or Command
+//   if(text == "/maysam"){
+//     bot.sendMessage(msg.chat.id, "hello maysam :)");
+//   }else if (text == "mahdi"){
+//     bot.sendMessage(msg.chat.id, 'my father is mahdi :D');
+//   }else{
+//     // bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
+//   }
 // });
