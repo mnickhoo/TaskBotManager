@@ -4,7 +4,6 @@
   "description": "somthing else",
   "main": "heroku.js",
   "scripts": {
-    "test": "heroku.js",
     "start": "node heroku.js"
   },
   "engines": {

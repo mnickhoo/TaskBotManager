@@ -3,7 +3,7 @@ const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
 const chanel_id = process.env.chanel_id ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-const port = process.env.PORT; 
+const port = process.env.PORT || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
 // const taskManager = require('./Services/ProjectService');
@@ -21,7 +21,7 @@ const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwz
 
 const options = {
   webHook: {
-    port: process.env.PORT
+    port: port
     // port : 2020
   }
 };
