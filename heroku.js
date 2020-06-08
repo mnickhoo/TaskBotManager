@@ -26,8 +26,8 @@ const options = {
   }
 };
 
-// const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
-const urlConfig = "https://2614ea314925.ngrok.io";
+const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
+// const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
 // This informs the Telegram servers of the new webhook.
