@@ -8,28 +8,36 @@ let projectModel = mongoose.model('project' , {
     } , 
     description: {
         type : String , 
-        require : true 
+        require : true ,
+        default : null,
     }, 
     linkInfo: {
-        type : String 
+        type : String ,
+        default : null
     },
     status : {
-        type : String
+        type : String,
+        default : null
     },
     freelancerId : {
-        type : Number
+        type : Number,
+        default : null
     }, 
     cowokerId : {
-        type: Number
+        type: Number,
+        default : null
     },
     duration: {
-        type : String
+        type : String,
+        default : null
     },
     point : {
-        type : Number
+        type : Number,
+        default : null
     }, 
     imageAddress : {
-        type : String
+        type : String,
+        default : null
     }
 })
 

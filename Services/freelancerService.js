@@ -55,7 +55,7 @@ var freelancerService = {
                 chatId : chatId
             }).then((freelancer)=> {
                 let check =  freelancer.lastCommand != null ;
-                resolve(check); 
+                resolve({"hasLastCommand": check, "lastCommand" : freelancer.lastCommand}); 
             });
         })   
     },

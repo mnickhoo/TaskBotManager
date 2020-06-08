@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const port = process.env.PORT || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
+const projectService = require('./Services/ProjectService');
 // const taskManager = require('./Services/ProjectService');
 const freelancerService = require('./Services/freelancerService');
 var url = require('url'); //Url Module
@@ -34,40 +35,6 @@ const bot = new TelegramBot(TOKEN, options);
 // Note: we do not need to pass in the cert, as it already provided
 bot.setWebHook(`${urlConfig}/bot${TOKEN}`);
 
-// app.get('/insert', function(req , res){
-//   var q = url.parse(req.url, true); //get url 
-//   var filename = "./views/insert.html" //find fileName
-//   fs.readFile(filename,function(err, data) {
-//     if(err) {
-//       res.writeHead(404,{'Content-Type': 'text/html'});
-//       return res.end("404 Not Found");
-//     } //Error 404 not Found
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-//     if(q.query.title != null){
-//       //initiate to project object
-
-//       let newProject = new projectModel({
-//           title : q.query.title , 
-//           description : q.query.description, 
-//           linkInfo : q.query.linkInfo , 
-//           expireDate : q.query.expireDate, 
-//           point : q.query.point
-//       }); 
-//       //save to db 
-//       newProject.save().then((project)=>{
-//           //send project to channel
-//           taskManager.SendToChannel(chanel_id , project); //send Task to Channel  
-
-//           console.log("project has been saved." , project);     
-//       },(err) =>{
-//           console.log("project unable to save on db", err);
-//       });
-//     }
-//     res.write(data); //return view
-//     return res.end();
-//   });
-// });
-
 app.post(`/bot${TOKEN}`, (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
@@ -80,16 +47,30 @@ bot.on('message', msg => {
       var message = msg.text; //get Message or Command
       freelancerService.isRegistered(chatId).then((registered)=> { 
         if(registered){//is user registered!?
-          freelancerService.hasLastCommand(chatId).then((hasLastCommand)=>{
-            if(hasLastCommand){//is user has last commamnd?
+          freelancerService.hasLastCommand(chatId).then((freelancer)=>{
+            if(freelancer.hasLastCommand){//is user has last commamnd?
               //PROCESS THE LAST COMAMND 
-              if(message.startsWith("/cancell")){
-                //set null to last command
-                freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
-                  bot.sendMessage(chatId, "the progress has been canceled!")
-                })
-              }
+              if(message == "/cancell"){ //check is user cancelled!?
+                  //set null to last command
+                  freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
+                    bot.sendMessage(chatId, "the progress has been canceled!")
+                  })
+              }else{
+                switch(freelancer.lastCommand){
+                  case "/title":
+                    projectService.createProject(message , chatId).then((project)=>{
+                      //set lastProjectId to freelancer
 
+                      //set last command to description
+
+                      //send message ok now tell me your description
+                    })
+                  break;
+                  case "/description":
+
+                  break;
+                }
+              }
             }else{//user hasn't last command
                 processTheMessage(chatId,message);  //MESSAGE IS A COMMAND?
             }
@@ -195,4 +176,38 @@ var processTheMessage = function(chatId,message){
 //   }else{
 //     // bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
 //   }
+// });
+
+// app.get('/insert', function(req , res){
+//   var q = url.parse(req.url, true); //get url 
+//   var filename = "./views/insert.html" //find fileName
+//   fs.readFile(filename,function(err, data) {
+//     if(err) {
+//       res.writeHead(404,{'Content-Type': 'text/html'});
+//       return res.end("404 Not Found");
+//     } //Error 404 not Found
+//     res.writeHead(200, {'Content-Type': 'text/html'});
+//     if(q.query.title != null){
+//       //initiate to project object
+
+//       let newProject = new projectModel({
+//           title : q.query.title , 
+//           description : q.query.description, 
+//           linkInfo : q.query.linkInfo , 
+//           expireDate : q.query.expireDate, 
+//           point : q.query.point
+//       }); 
+//       //save to db 
+//       newProject.save().then((project)=>{
+//           //send project to channel
+//           taskManager.SendToChannel(chanel_id , project); //send Task to Channel  
+
+//           console.log("project has been saved." , project);     
+//       },(err) =>{
+//           console.log("project unable to save on db", err);
+//       });
+//     }
+//     res.write(data); //return view
+//     return res.end();
+//   });
 // });

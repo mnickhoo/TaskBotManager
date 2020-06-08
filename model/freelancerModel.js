@@ -28,6 +28,10 @@ let freelancerModel = mongoose.model('freelancer' , {
     lastCommand : {
         type : String , 
         default : null
+    },
+    lastCreatedProject : {
+        type : String , 
+        default : null
     }
 });
 
