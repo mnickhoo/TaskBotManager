@@ -26,8 +26,8 @@ const options = {
   }
 };
 
-const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
-// const urlConfig = "https://ec8408f47e04.ngrok.io";
+// const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
+const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
 // This informs the Telegram servers of the new webhook.
@@ -83,6 +83,12 @@ bot.on('message', msg => {
           freelancerService.hasLastCommand(chatId).then((hasLastCommand)=>{
             if(hasLastCommand){//is user has last commamnd?
               //PROCESS THE LAST COMAMND 
+              if(message.startsWith("/cancell")){
+                //set null to last command
+                freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
+                  bot.sendMessage(chatId, "the progress has been canceled!")
+                })
+              }
 
             }else{//user hasn't last command
                 processTheMessage(chatId,message);  //MESSAGE IS A COMMAND?
