@@ -7,6 +7,9 @@
     "test": "heroku.js",
     "start": "node heroku.js"
   },
+  "engines": {
+    "node": "12.17.0"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
