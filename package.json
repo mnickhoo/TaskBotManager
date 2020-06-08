@@ -4,6 +4,7 @@
   "description": "somthing else",
   "main": "heroku.js",
   "scripts": {
+    "postinstall": "npm run build",
     "start": "node heroku.js"
   },
   "engines": {
