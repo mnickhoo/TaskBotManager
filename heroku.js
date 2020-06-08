@@ -153,9 +153,9 @@ var processTheMessage = function(chatId,message){
 }
 
 // // Start Express Server
-app.listen(port, () => {
-  console.log(`Bot server's listening on ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Bot server's listening on ${port}`);
+// });
 
 // var sendMessage = function(chatId , Message){
 //   bot.sendMessage(chatId , message); 
