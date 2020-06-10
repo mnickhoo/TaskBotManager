@@ -73,6 +73,47 @@ var freelancerService = {
                 console.log(err);
             })
         });
+    },
+    updateduration : function(chatId,duration){
+        return new Promise((resolve,reject)=>{
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            },{
+                $set:{
+                    duration : duration
+                }
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                console.log(err);
+            })
+        });
+    },
+    updateLastProjectId : function(chatId , projectId){
+        return new Promise((resolve , reject)=>{
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            },{
+                $set : {
+                    lastCreatedProject : projectId
+                }
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                reject(err);
+            })
+        });
+    },
+    findFreelancer : function(chatId){
+        return new Promise((resolve , reject)=>{
+            freelancerModel.findOne({
+                chatId : chatId
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
     }
 }
 

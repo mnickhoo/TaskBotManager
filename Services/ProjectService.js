@@ -15,18 +15,6 @@ const options = {
 var bot = new TelegramBot(token , options); 
 
 var projectService = {
-    task : {
-    id : "",
-    title: " ",
-    description : "",
-    linkInfo : "",
-    status:"",
-    freelancer:"",
-    publisher:"",
-    expireDate:"",
-    point:"",
-    image:""
-    }, 
     SendToChannel:function(chanel_id ,project){
         var text = this.CreateTemplate(project);
         var option = this.createButton(project.linkInfo,project._id)
@@ -34,7 +22,7 @@ var projectService = {
         console.log("send message!");   
     },
     CreateTemplate: function(project){
-        var txt = project.title + "\n\n" + "توضیحات:"+ project.description + "\n\n" + "زمان تحویل:" + project.expireDate +
+        var txt = project.title + "\n\n" + "توضیحات:"+ project.description + "\n\n" + "زمان تحویل:" + project.duration +
         "\n\n"+"امتیاز:" + project.point;
         return txt ; 
     },
@@ -50,6 +38,18 @@ var projectService = {
         };
         return opts;
     } , 
+    createButtonPreview(projectId){
+        //Create Button 
+        var opts ={
+            reply_markup: {
+                inline_keyboard: [
+                    [{text:"انتشار" , callback_data : "publish="+projectId}],
+                    []              
+                ]
+            }         
+        };
+        return opts;
+    },
     findProject : function(projectId){
         projectModel.findById({
             _id : projectModel
@@ -65,6 +65,50 @@ var projectService = {
             })
             newProject.save().then((project)=>{
                 resolve(project);
+            })
+        })
+    },
+    updateProjectDescription: function(projectId,description){
+        return new Promise((resolve,reject)=>{
+           projectModel.findOneAndUpdate({
+               _id : projectId
+           },{
+               $set: {description : description}
+           }).then((project)=>{
+               resolve(project);
+           })
+        })
+    },
+    updateProjectDuration: function(projectId,duration){
+        return new Promise((resolve,reject)=>{
+           projectModel.findOneAndUpdate({
+               _id : projectId
+           },{
+               $set: {duration : duration}
+           }).then((project)=>{
+               resolve(project);
+           })
+        })
+    },
+    updateProjectLinkInfo: function(projectId,linkInfo){
+        return new Promise((resolve,reject)=>{
+           projectModel.findOneAndUpdate({
+               _id : projectId
+           },{
+               $set: {linkInfo : linkInfo}
+           }).then((project)=>{
+               resolve(project);
+           }).catch((err)=>{
+               reject(err);
+           })
+        })
+    },
+    findProject : function(projectId){
+        return new Promise((resolve , reject)=>{
+            projectModel.findById(projectId).then((project)=>{
+                resolve(project);
+            }).catch((err)=>{
+                reject(err);
             })
         })
     }

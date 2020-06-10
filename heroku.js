@@ -19,6 +19,7 @@ app.use(bodyParser.json());
 // const TelegramBot = require('node-telegram-bot-api');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
 const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+/* Remeber */
 
 const options = {
   webHook: {
@@ -40,6 +41,26 @@ app.post(`/bot${TOKEN}`, (req, res) => {
   res.sendStatus(200);
 });
 
+bot.on('callback_query', (callbackQuery)=>{
+  //check the query data 
+  if(callbackQuery.data.startsWith("publish")){//start with publish
+    var projectId = callbackQuery.data.split("=")[1];
+    //splite publish to get project Id
+    projectService.findProject(projectId).then((project)=>{ //send task to channel 
+      projectService.SendToChannel(process.env.chanel_id , project)
+      bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
+    })
+  }else{//go to switch
+    switch(callbackQuery.data){
+      case "sample" : 
+  
+      break; 
+    }
+  }
+
+
+})
+
 // webhook API just to ping!
 bot.on('message', msg => {
   try {
@@ -53,21 +74,69 @@ bot.on('message', msg => {
               if(message == "/cancell"){ //check is user cancelled!?
                   //set null to last command
                   freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
-                    bot.sendMessage(chatId, "the progress has been canceled!")
+                    bot.sendMessage(chatId, "تمام دستورات لغو شد!")
                   })
               }else{
                 switch(freelancer.lastCommand){
                   case "/title":
                     projectService.createProject(message , chatId).then((project)=>{
                       //set lastProjectId to freelancer
-
-                      //set last command to description
-
-                      //send message ok now tell me your description
+                      console.log(project._id.toString())
+                      freelancerService.updateLastProjectId(chatId ,  project._id.toString()).then(()=>{
+                        //set last command to description
+                        freelancerService.updateLastCommmand(chatId,"/description").then(()=>{
+                        //send message ok now tell me yomur description
+                        bot.sendMessage(chatId , "خیلی عالی! \n یکم بیشتر در مورد پروژه ای که میخواهی تعریف کن ببینم");
+                        })
+                      }).catch((err)=>{
+                        console.log(err);
+                      })
                     })
                   break;
                   case "/description":
-
+                    //read last project Id and find project and description field.
+                    freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                      projectService.updateProjectDescription(freelancer.lastCreatedProject , message).then(()=>{
+                      //add exprireDate to lastComamnd
+                      freelancerService.updateLastCommmand(chatId,"/expiredate").then(()=>{
+                        bot.sendMessage(chatId, "چقدر وقت داری؟ \n بر اساس روز برام بفرست");
+                      });
+                    });
+                  });
+                  break;
+                  case "/expiredate": 
+                    //read last project Id and find project and description field.
+                    freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                      projectService.updateProjectDuration(freelancer.lastCreatedProject , message).then(()=>{
+                      //add exprireDate to lastComamnd
+                      freelancerService.updateLastCommmand(chatId,"/link").then(()=>{
+                        bot.sendMessage(chatId, "خب حالا لینک مرتبط به پروژه را برای من بفرست");
+                      });
+                    });
+                  });
+                  break;
+                  case "/link":
+                    //read last project Id and find project and description field.
+                    freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                      projectService.updateProjectLinkInfo(freelancer.lastCreatedProject , message).then(()=>{
+                      //add exprireDate to lastComamnd
+                      freelancerService.updateLastCommmand(chatId,null).then(()=>{
+                        bot.sendMessage(chatId, "تبریک میگم! \n پروژه ات با موفقیت ثبت شد");
+                        //send a preview of task with publish button
+                        freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                          projectService.findProject(freelancer.lastCreatedProject).then((project)=>{
+                          let text = projectService.CreateTemplate(project);
+                          let option = projectService.createButtonPreview(project._id.toString())
+                          bot.sendMessage(chatId, text , option);
+                        })
+                      })
+                      });
+                    });
+                  });
+                  break;
+                  case "/finish":
+                    freelancerService.updateLastCommmand(chatId,null).then(()=>{
+                    });
                   break;
                 }
               }
@@ -84,7 +153,7 @@ bot.on('message', msg => {
               freelancerService.registerFreelancer(newFreelancer).then((isRegistered)=>{ //register user in db
                 if(isRegistered){
                   processTheMessage(chatId,message); //process the command 
-                  bot.sendMessage(chatId , "you are registered!");
+                  bot.sendMessage(chatId , "شما با موفقیت ثبت نام شدید");
                 }
               })       
           } 
@@ -110,104 +179,35 @@ var processTheMessage = function(chatId,message){
   if(isCommand(message)){//is message has a command?
     switch(message){
       case "/start":
-        var taskId = message.split(" ")[1];  //pass taskId to get a task from db
-        projectModel.findOne({_id : taskId}).then((task)=>{ //get project selected
-          let myPromise = new Promise((resolve , reject) =>{
-              var freelancer = freelancerService.findAndUpdateFreelancer(chatId , task); //find and assign task to freelancer
-              resolve(freelancer);
-          }).then((freelacer)=> {
-              sendMessage(chatId , `you select project: ${freelancer.project.title}`);
+        if(message.indexOf(" ") == -1){
+          bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
+        }else{
+          var taskId = message.split(" ")[1];  //pass taskId to get a task from db
+          projectModel.findOne({_id : taskId}).then((task)=>{ //get project selected
+            let myPromise = new Promise((resolve , reject) =>{
+                var freelancer = freelancerService.findAndUpdateFreelancer(chatId , task); //find and assign task to freelancer
+                resolve(freelancer);
+            }).then((freelacer)=> {
+                sendMessage(chatId , `شما درخواستی شما: ${freelancer.project.title}`);
+            });
           });
-        });
+        }
         break;
       case "/cancell":
         //set null to last command
         freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
-          bot.sendMessage(chatId, "the progress has been canceled!")
+          bot.sendMessage(chatId, "تمامی دستورات لغو شد!")
         })
         break;
       case "/create":
         freelancerService.updateLastCommmand(chatId,"/title").then(()=>{
-          bot.sendMessage(chatId, "ok send me title of task");
+          bot.sendMessage(chatId, "لطفا عنوان پروژه رو برام بفرست");
         })
         break
       default:
-        bot.sendMessage(chatId , "command is not defined!");
+        bot.sendMessage(chatId , "دستور تعریف نشده!");
     }
   }else{//message not command
-        bot.sendMessage(chatId , "command is not defined!");
+    bot.sendMessage(chatId , "دستور تعریف نشده!");
   }
 }
-
-// // Start Express Server
-// app.listen(port, () => {
-//   console.log(`Bot server's listening on ${port}`);
-// });
-
-// var sendMessage = function(chatId , Message){
-//   bot.sendMessage(chatId , message); 
-// }
-
-// app.get('/' , function(req , res){
-//   res.writeHead(200 , {'Content-Type': 'text/html'}); 
-//   res.write("salam :)");
-//   res.end();
-// })
-
-// // We are receiving updates at the route below!
-// app.post(`/bot${TOKEN}`, (req, res) => {
-//   bot.processUpdate(req.body);
-//   res.sendStatus(200);
-// });
-
-// // Start Express Server
-// app.listen(port, () => {
-//   console.log(`Bot server's listening on ${port}`);
-// });
-
-// // Just to ping!
-// bot.on('message', function onMessage(msg) {
-//   var chatId = msg.chat.id; //get chatId
-//   var text = msg.text; //get Message or Command
-//   if(text == "/maysam"){
-//     bot.sendMessage(msg.chat.id, "hello maysam :)");
-//   }else if (text == "mahdi"){
-//     bot.sendMessage(msg.chat.id, 'my father is mahdi :D');
-//   }else{
-//     // bot.sendMessage(msg.chat.id, 'Hi my name is Task Bot');
-//   }
-// });
-
-// app.get('/insert', function(req , res){
-//   var q = url.parse(req.url, true); //get url 
-//   var filename = "./views/insert.html" //find fileName
-//   fs.readFile(filename,function(err, data) {
-//     if(err) {
-//       res.writeHead(404,{'Content-Type': 'text/html'});
-//       return res.end("404 Not Found");
-//     } //Error 404 not Found
-//     res.writeHead(200, {'Content-Type': 'text/html'});
-//     if(q.query.title != null){
-//       //initiate to project object
-
-//       let newProject = new projectModel({
-//           title : q.query.title , 
-//           description : q.query.description, 
-//           linkInfo : q.query.linkInfo , 
-//           expireDate : q.query.expireDate, 
-//           point : q.query.point
-//       }); 
-//       //save to db 
-//       newProject.save().then((project)=>{
-//           //send project to channel
-//           taskManager.SendToChannel(chanel_id , project); //send Task to Channel  
-
-//           console.log("project has been saved." , project);     
-//       },(err) =>{
-//           console.log("project unable to save on db", err);
-//       });
-//     }
-//     res.write(data); //return view
-//     return res.end();
-//   });
-// });
