@@ -86,7 +86,7 @@ bot.on('message', msg => {
                         //set last command to description
                         freelancerService.updateLastCommmand(chatId,"/description").then(()=>{
                         //send message ok now tell me yomur description
-                        bot.sendMessage(chatId , "خیلی عالی! \n یکم بیشتر در مورد پروژه ای که میخواهی تعریف کن ببینم");
+                        bot.sendMessage(chatId , "خیلی عالی! \n  یکم بیشتر در مورد پروژه ای که میخواهی تعریف کن ببینم \n در هر مرحله با دستور /cancell عملیات رو لغو کنید");
                         })
                       }).catch((err)=>{
                         console.log(err);
