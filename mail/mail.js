@@ -18,12 +18,15 @@ let mailService = {
             user: 'kidocodetask@gmail.com', 
             pass: '77616058'
         } 
-    });
+      });
+
       mailTransporter.sendMail(this.createOption(to,subject,text)).then((info, error)=>{
+        if(error)
+          throw error;
+           
         resolve(info);
-        }).catch((err)=>{
-          reject(err);
-        })
+        });
+
     })
   }
 }
