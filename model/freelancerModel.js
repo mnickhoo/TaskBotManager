@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const project = require('./projectModel');
-
 let freelancerModel = mongoose.model('freelancer' , {
     name : {
         type : String , 
@@ -30,6 +29,18 @@ let freelancerModel = mongoose.model('freelancer' , {
         default : null
     },
     lastCreatedProject : {
+        type : String , 
+        default : null
+    },
+    email : {
+        type : String , 
+        default : null
+    },
+    isVerfied : {
+        type : Boolean,
+        default : false
+    },
+    activateCode : {
         type : String , 
         default : null
     }

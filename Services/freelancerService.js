@@ -6,7 +6,7 @@ var freelancerService = {
          return new Promise((resolve , reject)=>{
             freelancerModel.count({chatId : chatId} , (err , count)=>{
                 if(err){
-                    throw err; //throw error
+                    reject(err);
                 }
                 if(count>0){//freelancer exist on db 
                   resolve(true)  ; 
@@ -17,6 +17,19 @@ var freelancerService = {
             });
          })
      }, 
+     isVerfied : function(chatId){
+       return new Promise((resolve , reject)=>{
+        freelancerModel.findOne({
+            chatId : chatId
+        }).then((freelancer)=> {
+            let check =  freelancer.isVerfied == true ;
+            resolve({"isVerfied": check}); 
+        });
+       })
+     },
+     checkValidation : function(message , code){
+         return message == code;
+     },
     registerFreelancer : function(freelancer){
         return new Promise((resolve,reject)=>{
             let newFreelancer = new freelancerModel({
@@ -26,7 +39,8 @@ var freelancerService = {
                 sheba  : null , 
                 skills : null , 
                 project : null , 
-                isMojaz : true
+                isMojaz : true, 
+                activateCode : freelancer.activateCode
             });
             newFreelancer.save().then((freelancer) => {
                 if(freelancer._id != null){
@@ -55,7 +69,7 @@ var freelancerService = {
                 chatId : chatId
             }).then((freelancer)=> {
                 let check =  freelancer.lastCommand != null ;
-                resolve({"hasLastCommand": check, "lastCommand" : freelancer.lastCommand}); 
+                resolve({"hasLastCommand": check, "lastCommand" : freelancer.lastCommand , "freelancer" : freelancer}); 
             });
         })   
     },
@@ -74,6 +88,21 @@ var freelancerService = {
             })
         });
     },
+    updateEmail : function(chatId,email){
+        return new Promise((resolve,reject)=>{
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            },{
+                $set:{
+                    email : email
+                }
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                console.log(err);
+            })
+        });
+    },
     updateduration : function(chatId,duration){
         return new Promise((resolve,reject)=>{
             freelancerModel.findOneAndUpdate({
@@ -81,6 +110,21 @@ var freelancerService = {
             },{
                 $set:{
                     duration : duration
+                }
+            }).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                console.log(err);
+            })
+        });
+    },
+    updateIsverified : function(chatId,check){
+        return new Promise((resolve,reject)=>{
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            },{
+                $set:{
+                    isVerfied : check
                 }
             }).then((freelancer)=>{
                 resolve(freelancer);
@@ -114,7 +158,11 @@ var freelancerService = {
                 reject(err);
             })
         })
-    }
+    },
+    generateCode : function(){
+        let code = Math.floor(1000 + Math.random() * 9000);
+        return code;
+    },
 }
 
 
