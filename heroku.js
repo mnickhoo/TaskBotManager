@@ -199,6 +199,9 @@ bot.on('message', msg => {
   }
 });
 
+bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
+
+
 var sendMessage = function(chatId , message){
   bot.sendMessage(chatId , message);
 }
