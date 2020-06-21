@@ -38,6 +38,10 @@ let projectModel = mongoose.model('project' , {
     imageAddress : {
         type : String,
         default : null
+    },
+    postId : {
+        type : String,
+        default : null
     }
 })
 

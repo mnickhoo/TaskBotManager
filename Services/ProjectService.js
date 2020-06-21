@@ -103,6 +103,19 @@ var projectService = {
            })
         })
     },
+    updatePoint: function(projectId,point){
+        return new Promise((resolve,reject)=>{
+           projectModel.findOneAndUpdate({
+               _id : projectId
+           },{
+               $set: {point : point}
+           }).then((project)=>{
+               resolve(project);
+           }).catch((err)=>{
+               reject(err);
+           })
+        })
+    },
     findProject : function(projectId){
         return new Promise((resolve , reject)=>{
             projectModel.findById(projectId).then((project)=>{

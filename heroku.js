@@ -121,20 +121,30 @@ bot.on('message', msg => {
                     freelancerService.findFreelancer(chatId).then((freelancer)=>{
                       projectService.updateProjectLinkInfo(freelancer.lastCreatedProject , message).then(()=>{
                       //add exprireDate to lastComamnd
-                      freelancerService.updateLastCommmand(chatId,null).then(()=>{
-                        bot.sendMessage(chatId, "تبریک میگم! \n پروژه ات با موفقیت ثبت شد");
-                        //send a preview of task with publish button
-                        freelancerService.findFreelancer(chatId).then((freelancer)=>{
-                          projectService.findProject(freelancer.lastCreatedProject).then((project)=>{
-                          let text = projectService.CreateTemplate(project);
-                          let option = projectService.createButtonPreview(project._id.toString())
-                          bot.sendMessage(chatId, text , option);
-                        })
-                      })
+                      freelancerService.updateLastCommmand(chatId,"/point").then(()=>{
+                        bot.sendMessage(chatId, "امتیاز پروژه رو به عدد برای من بفرستید");
                       });
                     });
                   });
                   break;
+                  case "/point":
+                    freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                      projectService.updatePoint(freelancer.lastCreatedProject , message).then(()=>{
+                      //add exprireDate to lastComamnd
+                      freelancerService.updateLastCommmand(chatId,null).then(()=>{
+                        bot.sendMessage(chatId, "تبریک میگم \n پروژه شما با موفقیت ایجاد شد");
+                         //send a preview of task with publish button
+                      freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                        projectService.findProject(freelancer.lastCreatedProject).then((project)=>{
+                        let text = projectService.CreateTemplate(project);
+                        let option = projectService.createButtonPreview(project._id.toString())
+                        bot.sendMessage(chatId, text , option);
+                      });
+                    });
+                  });
+                });
+              });
+                    break;
                   case "/email" : 
                     //check email is validate?
 
@@ -199,7 +209,7 @@ bot.on('message', msg => {
   }
 });
 
-bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
+// bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
 
 
 var sendMessage = function(chatId , message){
