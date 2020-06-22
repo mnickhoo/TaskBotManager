@@ -49,11 +49,22 @@ bot.on('callback_query', (callbackQuery)=>{
     //splite publish to get project Id
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
       let msg = projectService.SendToChannel(process.env.chanel_id , project);
-        bot.sendMessage(msg.chanel_id , msg.text , msg.option).then(()=>{
-          bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
-        }).catch((err)=>{
-          console.log(err);
-        })    
+      let opt = {
+          inline_keyboard: [
+          [{text:"بیشتر" , url: project.linkInfo}, {text:"قبول", url: "https://t.me/yechizebahalbot?start="+project._id}],
+          []              
+      ]
+      }
+      bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
+        bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
+      }).catch((err)=>{
+        console.log(err);
+      })
+        // bot.sendMessage(msg.chanel_id , msg.text , msg.option).then(()=>{
+        //   bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
+        // }).catch((err)=>{
+        //   console.log(err);
+        // })    
     })
   }else{//go to switch
     switch(callbackQuery.data){
@@ -69,6 +80,7 @@ bot.on('message', msg => {
   try {
       var chatId = msg.chat.id; //get chatId
       var message = msg.text; //get Message or Command
+
       freelancerService.isRegistered(chatId).then((registered)=> { 
         if(registered){//is user registered!?
           freelancerService.hasLastCommand(chatId).then((freelancer)=>{
@@ -146,7 +158,6 @@ bot.on('message', msg => {
                         projectService.findProject(freelancer.lastCreatedProject).then((project)=>{
                         let text = projectService.CreateTemplate(project);
                         let option = projectService.createButtonPreview(project._id.toString())
-                        bot.sendPhoto(chatId , "/images/1.png")
                         bot.sendMessage(chatId, text , option);
                       });
                     });
