@@ -3,7 +3,7 @@ const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
 const chanel_id = process.env.chanel_id ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-const port = process.env.PORT_Test || 3000;
+const port = process.env.PORT || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
 const projectService = require('./Services/ProjectService');
@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
-const TOKEN = process.env.TELEGRAM_TOKEN_Test || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 /* Remeber */
 
 const options = {
@@ -29,7 +29,7 @@ const options = {
   }
 };
 
-const urlConfig = process.env.APP_URL_Test || 'https://tranquil-inlet-79772.herokuapp.com/';
+const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
 // const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
