@@ -146,6 +146,7 @@ bot.on('message', msg => {
                         projectService.findProject(freelancer.lastCreatedProject).then((project)=>{
                         let text = projectService.CreateTemplate(project);
                         let option = projectService.createButtonPreview(project._id.toString())
+                        bot.sendPhoto(chatId , "/images/1.png")
                         bot.sendMessage(chatId, text , option);
                       });
                     });
