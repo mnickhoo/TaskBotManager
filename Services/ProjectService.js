@@ -29,6 +29,14 @@ var projectService = {
     },
     createButton(linkInfo,_id){
         //Create Button 
+        // var opts ={
+        //     reply_markup: {
+        //         inline_keyboard: [
+        //             [{text:"بیشتر" , url: linkInfo}, {text:"قبول", url: "https://t.me/kidocodetestbot?start="+_id}],
+        //             []              
+        //         ]
+        //     }         
+        // };
         var opts ={
             reply_markup: {
                 inline_keyboard: [

@@ -47,10 +47,12 @@ let freelancerModel = mongoose.model('freelancer' , {
     point : {
         type : Number , 
         default : 0 
+    } , 
+    userName : {
+        type : String , 
+        default : null
     }
 });
-
-
 
 module.exports = {
     freelancerModel

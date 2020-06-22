@@ -119,15 +119,21 @@ bot.on('message', msg => {
                   });
                   break;
                   case "/link":
-                    //read last project Id and find project and description field.
-                    freelancerService.findFreelancer(chatId).then((freelancer)=>{
-                      projectService.updateProjectLinkInfo(freelancer.lastCreatedProject , message).then(()=>{
-                      //add exprireDate to lastComamnd
-                      freelancerService.updateLastCommmand(chatId,"/point").then(()=>{
-                        bot.sendMessage(chatId, "امتیاز پروژه رو به عدد برای من بفرستید");
+                    let pattern = "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)";
+                    let regex = new RegExp(pattern); 
+                   if(message.match(regex)){
+                        //read last project Id and find project and description field.
+                        freelancerService.findFreelancer(chatId).then((freelancer)=>{
+                          projectService.updateProjectLinkInfo(freelancer.lastCreatedProject , message).then(()=>{
+                          //add exprireDate to lastComamnd
+                          freelancerService.updateLastCommmand(chatId,"/point").then(()=>{
+                            bot.sendMessage(chatId, "امتیاز پروژه رو به عدد برای من بفرستید");
+                          });
+                        });
                       });
-                    });
-                  });
+                   }else{ //has not matched
+                    bot.sendMessage(chatId , "آدرس صحیح نمی باشد لطفا آدرس صحیح را وارد کنید");
+                   }
                   break;
                   case "/point":
                     freelancerService.findFreelancer(chatId).then((freelancer)=>{
