@@ -43,6 +43,10 @@ let freelancerModel = mongoose.model('freelancer' , {
     activateCode : {
         type : String , 
         default : null
+    },
+    point : {
+        type : Number , 
+        default : 0 
     }
 });
 

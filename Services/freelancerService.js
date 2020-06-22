@@ -54,14 +54,16 @@ var freelancerService = {
         })
     } , 
     findAndUpdateFreelancer : function(chatId , task){
-       let freelancer = freelancerModel.findOneAndUpdate({
-            chatId : chatId
-        } , {project : task} , {new : true}).then((freelancer) => {
-            //write somthing here
-        } , (err) => {
-            console.log(err)
+        return new Promise((resolve , reject) => {
+            freelancerModel.findOneAndUpdate({
+                chatId : chatId
+            } , {project : task} , {new : true}).then((freelancer) => {
+                //write somthing here
+                resolve(freelancer) ;
+            } , (err) => {
+               reject(err);
+            })  
         })
-        return freelancer;
     }, 
     hasLastCommand : function(chatId){
         return new Promise((resolve, reject)=>{
@@ -125,7 +127,7 @@ var freelancerService = {
             },{
                 $set:{
                     isVerfied : check
-                }
+                   }
             }).then((freelancer)=>{
                 resolve(freelancer);
             }).catch((err)=>{

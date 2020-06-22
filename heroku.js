@@ -48,8 +48,12 @@ bot.on('callback_query', (callbackQuery)=>{
     var projectId = callbackQuery.data.split("=")[1];
     //splite publish to get project Id
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
-      projectService.SendToChannel(process.env.chanel_id , project)
-      bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
+      let msg = projectService.SendToChannel(process.env.chanel_id , project);
+        bot.sendMessage(msg.chanel_id , msg.text , msg.option).then(()=>{
+          bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
+        }).catch((err)=>{
+          console.log(err);
+        })    
     })
   }else{//go to switch
     switch(callbackQuery.data){
@@ -58,8 +62,6 @@ bot.on('callback_query', (callbackQuery)=>{
       break; 
     }
   }
-
-
 })
 
 // webhook API just to ping!
@@ -226,36 +228,35 @@ var isCommand = function(message){
 
 var processTheMessage = function(chatId,message){
   if(isCommand(message)){//is message has a command?
-    switch(message){
-      case "/start":
-        if(message.indexOf(" ") == -1){
-          bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
-        }else{
-          var taskId = message.split(" ")[1];  //pass taskId to get a task from db
-          projectModel.findOne({_id : taskId}).then((task)=>{ //get project selected
-            let myPromise = new Promise((resolve , reject) =>{
-                var freelancer = freelancerService.findAndUpdateFreelancer(chatId , task); //find and assign task to freelancer
-                resolve(freelancer);
-            }).then((freelacer)=> {
-                sendMessage(chatId , `شما درخواستی شما: ${freelancer.project.title}`);
-            });
-          });
-        }
-        break;
-      case "/cancell":
-        //set null to last command
-        freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
-          bot.sendMessage(chatId, "تمامی دستورات لغو شد!")
-        })
-        break;
-      case "/create":
-        freelancerService.updateLastCommmand(chatId,"/title").then(()=>{
-          bot.sendMessage(chatId, "لطفا عنوان پروژه رو برام بفرست");
-        })
-        break;
-      default:
-        bot.sendMessage(chatId , "دستور تعریف نشده!");
+    if(message.startsWith("/start")){
+      if(message.indexOf(" ") == -1){
+        bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
+      }else{
+        var taskId = message.split(" ")[1];  //pass taskId to get a task from db
+        projectService.findProject(taskId).then((project)=>{
+        freelancerService.findAndUpdateFreelancer(chatId , project).then((result)=>{//find and assign task to freelancer
+            bot.sendMessage(chatId , `درخواست شما ثبت شد: ${result.project.title}`);
+          }) 
+        });
+      }
+    }else{
+      switch(message){
+        case "/cancell":
+          //set null to last command
+          freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
+            bot.sendMessage(chatId, "تمامی دستورات لغو شد!")
+          })
+          break;
+        case "/create":
+          freelancerService.updateLastCommmand(chatId,"/title").then(()=>{
+            bot.sendMessage(chatId, "لطفا عنوان پروژه رو برام بفرست");
+          })
+          break;
+        default:
+          bot.sendMessage(chatId , "دستور تعریف نشده!");
+      }
     }
+ 
   }else{//message not command
     bot.sendMessage(chatId , "دستور تعریف نشده!");
   }
