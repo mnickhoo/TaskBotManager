@@ -119,7 +119,7 @@ bot.on('message', msg => {
                   });
                   break;
                   case "/link":
-                    let pattern = "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)";
+                    let pattern = "^(https?|chrome):\/\/[^\s$.?#].[^\s]*$";
                     let regex = new RegExp(pattern); 
                    if(message.match(regex)){
                         //read last project Id and find project and description field.
