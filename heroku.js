@@ -251,6 +251,11 @@ var processTheMessage = function(chatId,message){
         bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
       }else{
         var taskId = message.split(" ")[1];  //pass taskId to get a task from db
+        //check user is Mojaz
+
+        //check point Score to get the project if under 100 Score can't get up to 1 project
+
+        //
         projectService.findProject(taskId).then((project)=>{
         freelancerService.findAndUpdateFreelancer(chatId , project).then((result)=>{//find and assign task to freelancer
             bot.sendMessage(chatId , `درخواست شما ثبت شد: ${result.project.title}`);
