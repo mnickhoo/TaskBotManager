@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const project = require('./projectModel');
+const {projectModel} = require('./projectModel')
 let freelancerModel = mongoose.model('freelancer' , {
     name : {
         type : String , 
@@ -18,11 +19,13 @@ let freelancerModel = mongoose.model('freelancer' , {
     skills: {
         type: Array(String)
     },
-    project:{
+    project :{
         type : project
-    },
+    }
+    ,
     isMojaz:{
-        type : Boolean
+        type : Boolean , 
+        default : true
     },
     lastCommand : {
         type : String , 
@@ -46,12 +49,15 @@ let freelancerModel = mongoose.model('freelancer' , {
     },
     point : {
         type : Number , 
-        default : 0 
+        default : 50 
     } , 
     userName : {
         type : String , 
         default : null
-    }
+    }, 
+    projects : [
+        {projectId : String , cowokerId : String  , status : String }
+    ]
 });
 
 module.exports = {

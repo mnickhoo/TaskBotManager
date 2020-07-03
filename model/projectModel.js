@@ -17,7 +17,7 @@ let projectModel = mongoose.model('project' , {
     },
     status : {
         type : String,
-        default : null
+        default : "todo"
     },
     freelancerId : {
         type : Number,

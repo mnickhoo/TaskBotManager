@@ -1,9 +1,9 @@
 require('dotenv/config');
 const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
-const chanel_id = process.env.chanel_id ; 
+const chanel_id = process.env.chanel_id_Test ; 
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT_Test || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
 const projectService = require('./Services/ProjectService');
@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
-const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+const TOKEN = process.env.TELEGRAM_TOKEN_Test || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 /* Remeber */
 
 const options = {
@@ -29,7 +29,7 @@ const options = {
   }
 };
 
-const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
+const urlConfig = process.env.APP_URL_Test || 'https://tranquil-inlet-79772.herokuapp.com/';
 // const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
@@ -48,13 +48,14 @@ bot.on('callback_query', (callbackQuery)=>{
     var projectId = callbackQuery.data.split("=")[1];
     //splite publish to get project Id
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
-      let msg = projectService.SendToChannel(process.env.chanel_id , project);
-      let opt = {
-          inline_keyboard: [
-          [{text:"بیشتر" , url: project.linkInfo}, {text:"قبول", url: "https://t.me/yechizebahalbot?start="+project._id}],
-          []              
-      ]
-      }
+      let msg = projectService.SendToChannel(chanel_id , project);
+      // let opt = {
+      //     inline_keyboard: [
+      //     [{text:"قبول", url: "https://t.me/kidocodetestbot?start="+project._id}],
+      //     []              
+      // ]
+      // }
+      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
       bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
       }).catch((err)=>{
@@ -66,6 +67,29 @@ bot.on('callback_query', (callbackQuery)=>{
         //   console.log(err);
         // })    
     })
+  }else if(callbackQuery.data.startsWith("accept")){//
+    //after coWorker accept project will have been deleted from chanel
+    let data = ConvertToObject(callbackQuery.data);
+    let projectId = data.projectId; 
+    let chatId = data.chatId;
+    if(data.accept == "true"){
+    //send a message to freelancer you can do it 
+    projectService.findProject(projectId).then((project)=>{
+      project.status = "doing"; //change status project to doing
+      freelancerService.findAndUpdateFreelancer(chatId , {projectId : projectId , cowokerId : project.cowokerId  , status : "doing"}).then((result)=>{//find and assign task to freelancer
+          bot.sendMessage(chatId , `درخواست شما برای این پروژه با موفقیت قبول شد \n نام پروژه : ${project.title} \n توضیحات : ${project.description}`);
+          bot.sendMessage(chatId , `شما به مدت ${project.duration} روز زمان دارید.`);
+        }) 
+      });
+    }else{
+      //send a decline message to freelancer 
+      bot.sendMessage(chatId , `درخواست شما برای پروژه ${project.title} توسط کارفرما رد شد.`);
+
+    }
+    
+
+   
+
   }else{//go to switch
     switch(callbackQuery.data){
       case "sample" : 
@@ -91,6 +115,15 @@ bot.on('message', msg => {
                   freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
                     bot.sendMessage(chatId, "تمام دستورات لغو شد!")
                   })
+              }else if(message == "لینک ندارم"){
+                let removeKeyboard = {
+                  reply_markup : {
+                    remove_keyboard : true
+                    }
+                  }
+                freelancerService.updateLastCommmand(chatId,"/point").then(()=>{
+                  bot.sendMessage(chatId, "امتیاز پروژه رو به عدد برای من بفرستید",removeKeyboard);
+                });
               }else{
                 switch(freelancer.lastCommand){
                   case "/title":
@@ -123,9 +156,18 @@ bot.on('message', msg => {
                     //read last project Id and find project and description field.
                     freelancerService.findFreelancer(chatId).then((freelancer)=>{
                       projectService.updateProjectDuration(freelancer.lastCreatedProject , message).then(()=>{
-                      //add exprireDate to lastComamnd
+                      //add link to lastComamnd
+                      let keyboard = {
+                        reply_markup : {
+                          keyboard: [
+                            [{text:"لینک ندارم"}],
+                            []              
+                        ],
+                        resize_keyboard : true
+                        }
+                      }
                       freelancerService.updateLastCommmand(chatId,"/link").then(()=>{
-                        bot.sendMessage(chatId, "خب حالا لینک مرتبط به پروژه را برای من بفرست");
+                        bot.sendMessage(chatId, "خب حالا لینک مرتبط به پروژه را برای من بفرست" , keyboard);
                       });
                     });
                   });
@@ -206,11 +248,13 @@ bot.on('message', msg => {
             }
           })
           } else{//user must be register on db      
+
               let newFreelancer = new freelancerModel({
                   name : msg.chat.first_name , 
                   family : msg.chat.last_name , 
                   chatId : chatId , 
-                  activateCode : freelancerService.generateCode()
+                  activateCode : freelancerService.generateCode(), 
+                  userName : freelancerService.generateUserId(5)
               })
               freelancerService.registerFreelancer(newFreelancer).then((isRegistered)=>{ //register user in db
                 if(isRegistered){
@@ -230,8 +274,6 @@ bot.on('message', msg => {
 });
 
 // bot.on('new_chat_members', (ctx) => console.log(ctx.message.new_chat_members))
-
-
 var sendMessage = function(chatId , message){
   bot.sendMessage(chatId , message);
 }
@@ -251,16 +293,47 @@ var processTheMessage = function(chatId,message){
         bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
       }else{
         var taskId = message.split(" ")[1];  //pass taskId to get a task from db
-        //check user is Mojaz
+        freelancerService.findFreelancer(chatId).then((freelancer)=>{
+          //check user is Mojaz
+          if(freelancer.isMojaz){
+          //check point Score to get the project if under 100 Score can't take over 1 project
+          if(freelancer.point < 100){
+            if(freelancer.projects.length != 0){//means now have an active project
+            //send message you have an active project
+            bot.sendMessage(chatId , "شما در حال حاضر یک پروژه فعال در دست دارید.");
+            }else{ //have not any project
+            //send a request to Coworker to accept request 
+            projectService.findProject(taskId).then((project)=>{
+                //send freelancer chat Id and project Id 
+               let opt = projectService.createButtonAcceptRequest(chatId , project._id);
+                //send message to coworker
+                bot.sendMessage(project.cowokerId , `کاربر درخواست انجام پروژه شما را دارد \n کاربر : ${freelancer.name} \n نام پروژه : ${project.title} `, opt);
+              });
 
-        //check point Score to get the project if under 100 Score can't get up to 1 project
+            }
+          }else{ //have enought point and get a new project
 
-        //
-        projectService.findProject(taskId).then((project)=>{
-        freelancerService.findAndUpdateFreelancer(chatId , project).then((result)=>{//find and assign task to freelancer
-            bot.sendMessage(chatId , `درخواست شما ثبت شد: ${result.project.title}`);
-          }) 
+            //should be assign a new project to freelancer
+
+            //and finally send a message to freelancer
+
+          }
+          }else{ //is not Mojaz
+            bot.sendMessage(chatId , "شما مجاز به دریافت پروژه نمی باشید.");
+          }
         });
+
+
+        //after coWorker accept project will have been deleted from chanel
+
+        //send a message to freelancer you can do it 
+
+        //change status project to doing
+
+        //send schadule time to 
+        
+        //set menu to chat with coWorker or Done project
+
       }
     }else{
       switch(message){
@@ -283,4 +356,16 @@ var processTheMessage = function(chatId,message){
   }else{//message not command
     bot.sendMessage(chatId , "دستور تعریف نشده!");
   }
+}
+
+
+
+function ConvertToObject(stringParameter){
+  let obj = {};
+  let parameters = stringParameter.split("&");
+  parameters.forEach(param => {
+    let part = param.split("=");
+    obj[part[0]] = part[1];
+  });
+  return obj;
 }

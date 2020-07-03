@@ -18,34 +18,35 @@ var bot = new TelegramBot(token , options);
 var projectService = {
     SendToChannel:function(chanel_id ,project){
             var text = this.CreateTemplate(project);
-            var option = this.createButton(project.linkInfo,project._id)
-            console.log("send message!");   
-            return({"chanel_id" : chanel_id , "text" : text , "option" : option})   
+            return({"chanel_id" : chanel_id , "text" : text })   
     },
     CreateTemplate: function(project){
         var txt = project.title + "\n\n" + "توضیحات:"+ project.description + "\n\n" + "زمان تحویل:" + project.duration +
         "\n\n"+"امتیاز:" + project.point;
         return txt ; 
     },
-    createButton(linkInfo,_id){
-        //Create Button 
-        // var opts ={
-        //     reply_markup: {
-        //         inline_keyboard: [
-        //             [{text:"بیشتر" , url: linkInfo}, {text:"قبول", url: "https://t.me/kidocodetestbot?start="+_id}],
-        //             []              
-        //         ]
-        //     }         
-        // };
-        var opts ={
-            reply_markup: {
-                inline_keyboard: [
-                    [{text:"بیشتر" , url: linkInfo}, {text:"قبول", url: "https://t.me/yechizebahalbot?start="+_id}],
+    createButton(linkInfo,projectId,userBot){
+        try{
+            var opt ;
+            if(linkInfo != null){
+                 opt = {
+                    inline_keyboard: [
+                    [{text:"بیشتر" , url: linkInfo}, {text:"قبول", url: "https://t.me/"+userBot+"?start="+projectId}],
                     []              
                 ]
-            }         
-        };
-        return opts;
+                }
+            }else{
+                opt = {
+                    inline_keyboard: [
+                    [{text:"قبول", url: "https://t.me/"+userBot+"?start="+projectId}],
+                    []              
+                ]
+                }
+            }
+            return opt;
+        }catch{
+
+        }
     } , 
     createButtonPreview(projectId){
         //Create Button 
@@ -54,6 +55,18 @@ var projectService = {
                 inline_keyboard: [
                     [{text:"انتشار" , callback_data : "publish="+projectId}],
                     []              
+                ]
+            }         
+        };
+        return opts;
+    },
+    createButtonAcceptRequest(chatId , projectId){
+        //Create Button 
+        var opts ={
+            reply_markup: {
+                inline_keyboard: [
+                    [{text:"قبول" , callback_data : "accept="+true+"&projectId="+projectId+"&chatId="+chatId}],
+                    [{text:"رد درخواست" , callback_data : "accept="+false+"&projectId="+projectId+"&chatId="+chatId}]              
                 ]
             }         
         };

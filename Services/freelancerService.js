@@ -36,11 +36,8 @@ var freelancerService = {
                 name : freelancer.name , 
                 family : freelancer.family , 
                 chatId : freelancer.chatId , 
-                sheba  : null , 
-                skills : null , 
-                project : null , 
-                isMojaz : true, 
-                activateCode : freelancer.activateCode
+                activateCode : freelancer.activateCode , 
+                userName : freelancer.userName
             });
             newFreelancer.save().then((freelancer) => {
                 if(freelancer._id != null){
@@ -57,7 +54,7 @@ var freelancerService = {
         return new Promise((resolve , reject) => {
             freelancerModel.findOneAndUpdate({
                 chatId : chatId
-            } , {project : task} , {new : true}).then((freelancer) => {
+            } , {projects : task} , {new : true}).then((freelancer) => {
                 //write somthing here
                 resolve(freelancer) ;
             } , (err) => {
@@ -161,10 +158,29 @@ var freelancerService = {
             })
         })
     },
+    findFreelancerById : function(_id){
+        return new Promise((resolve , reject)=>{
+            freelancerModel.findById(_id).then((freelancer)=>{
+                resolve(freelancer);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
+    },
     generateCode : function(){
         let code = Math.floor(1000 + Math.random() * 9000);
         return code;
     },
+    generateUserId : function makeid(length) {
+        let result = '';
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return "user"+result;
+     }
+
 }
 
 
