@@ -148,6 +148,17 @@ var projectService = {
                 reject(err);
             })
         })
+    }, 
+    updateFreelancerIdAndStatus: function(projectId,status,freelancerId){
+        return new Promise((resolve,reject)=>{
+           projectModel.findOneAndUpdate({
+               _id : projectId
+           },{
+               $set: {freelancerId : freelancerId , status : status}
+           }).then((project)=>{
+               resolve(project);
+           })
+        })
     }
 }
 

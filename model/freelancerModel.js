@@ -56,7 +56,7 @@ let freelancerModel = mongoose.model('freelancer' , {
         default : null
     }, 
     projects : [
-        {projectId : String , cowokerId : String  , status : String }
+        {projectId : String , cowokerId : String  , status : String , point : String , title : String }
     ]
 });
 
