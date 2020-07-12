@@ -1,9 +1,10 @@
 require('dotenv/config');
 const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
-const chanel_id = process.env.chanel_id ; 
+const chanel_id = process.env.chanel_id_Test ; 
+const review_chanell = process.env.review_channel;
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-const port = process.env.PORT || 3000;
+const port = process.env.PORT_Test || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
 const projectService = require('./Services/ProjectService');
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
-const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+const TOKEN = process.env.TELEGRAM_TOKEN_Test || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 /* Remeber */
 
 const options = {
@@ -29,7 +30,7 @@ const options = {
   }
 };
 
-const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
+const urlConfig = process.env.APP_URL_Test || 'https://tranquil-inlet-79772.herokuapp.com/';
 // const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
@@ -50,7 +51,7 @@ bot.on('callback_query', (callbackQuery)=>{
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
       let msg = projectService.SendToChannel(chanel_id , project);
 
-      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot);
+      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
       bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
       }).catch((err)=>{
@@ -79,7 +80,103 @@ bot.on('callback_query', (callbackQuery)=>{
       })
     }
     
-  }else{//go to switch
+  }else if(callbackQuery.data.startsWith("projectId")){
+    var projectId = callbackQuery.data.split("=")[1];
+    //find project and add status to done-review
+    projectService.findOne(projectId).then((project)=>{
+      //run on project
+      var opts ={
+        inline_keyboard: [[{text : "کنسل" , callback_data : "CancellProject="+projectId},{text : "اتمام پروژه" , callback_data : "finishProject="+projectId}],[{text : "پروژه های من " , callback_data : "myProject"}]]    
+      };
+      let chatIdUpdate = callbackQuery.message.chat.id;
+      let messageId = callbackQuery.message.message_id;
+      let text = `پروژه: ${project.title} \n توضیحات: ${project.description}`;
+      // var markup = {
+      //   chat_id: callbackQuery.message.chat.id,
+      //   message_id: callbackQuery.message.message_id,
+      //   reply_markup: opts
+      // }
+      // console.log(project);
+      editMessageText(chatIdUpdate, messageId , text , opts );
+      // bot.editMessageText(`پروژه: ${project.title} \n توضیحات: ${project.description}`, markup).then((response) => {
+      // }).catch((err)=>{
+      //   console.log(err);
+      // })
+
+    })
+    //send post to review channel 
+
+    //send message to coworker
+
+   
+  }else if(callbackQuery.data == "myProject"){
+      //show project list 
+      freelancerService.findFreelancer(callbackQuery.from.id).then((freelancer)=>{
+        if(freelancer.projects.length > 0){ // if freelancer have a project
+          let inline_keyboards = [];
+          let keyboard ; 
+          freelancer.projects.forEach((project)=>{
+            keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
+            inline_keyboards.push(keyboard);
+          })
+          inline_keyboards.push([]);
+        //   var opts ={
+        //     reply_markup: {
+        //         inline_keyboard: inline_keyboards
+        //     }         
+        // };
+
+        var opts ={
+          inline_keyboard: inline_keyboards   
+        };
+        let chatIdUpdate = callbackQuery.message.chat.id;
+        let messageId = callbackQuery.message.message_id;
+        let text = "پروژه های در حال انجام";
+        editMessageText(chatIdUpdate , messageId , text , opts)
+        //  bot.sendMessage(chatId , "پروژه های در حال انجام", opts);
+
+        }else{ //freelancer has not project
+          bot.sendMessage(chatId, "شما هیچ پروژه فعالی ندارید");
+        }
+      })
+  }else if(callbackQuery.data.startsWith("CancellProject")){
+    var projectId = callbackQuery.data.split("=")[1];
+    //cancell to project to todo 
+
+    //delete from freelancer
+
+    //publish on chnnel
+    projectService.findProject(projectId).then((project)=>{ //send task to channel 
+      let msg = projectService.SendToChannel(chanel_id , project);
+
+      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
+      bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
+        bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت کنسل شد" });
+      }).catch((err)=>{
+        console.log(err);
+      })
+    })
+    bot.sendMessage(callbackQuery.from.id , "پروژه کنسل شد");
+  }else if(callbackQuery.data.startsWith("finishProject")){
+    var projectId = callbackQuery.data.split("=")[1];
+    //add status to review
+
+    //send post to review channel
+    projectService.findProject(projectId).then((project)=>{ //send task to channel 
+      let msg = projectService.SendToChannel(review_chanell , project);
+
+      let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot_Test);
+      bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
+        bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
+      }).catch((err)=>{
+        console.log(err);
+      })
+    })
+    //send message to freelancer for review
+
+
+  }
+  else{//go to switch
     switch(callbackQuery.data){
       case "sample" : 
   
@@ -351,7 +448,7 @@ var processTheMessage = function(chatId,message){
           let inline_keyboards = [];
           let keyboard ; 
           freelancer.projects.forEach((project)=>{
-            keyboard = [{text : project.title , callback_data : "projectId="+project._id}]
+            keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
             inline_keyboards.push(keyboard);
           })
           inline_keyboards.push([]);
@@ -428,4 +525,19 @@ function removeKeyboard(){
       }
     }
     return removeKeyboard; 
+}
+
+function editMessageText(chatId , messageId , text, opts , ){
+  return new Promise((resolve , reject) =>{
+    var markup = {
+      chat_id: chatId,
+      message_id: messageId,
+      reply_markup: opts
+    }
+    bot.editMessageText(text, markup).then((response) => {
+      resolve(response);
+    }).catch((err)=>{
+      reject(err);
+    })
+  })
 }

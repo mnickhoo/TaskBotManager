@@ -48,6 +48,29 @@ var projectService = {
 
         }
     } , 
+    createButtonReview(linkInfo,projectId,userBot){
+        try{
+            var opt ;
+            if(linkInfo != null){
+                 opt = {
+                    inline_keyboard: [
+                    [{text:"بیشتر" , url: linkInfo}, {text:"جهت بررسی", url: "https://t.me/"+userBot+"?start="+projectId}],
+                    []              
+                ]
+                }
+            }else{
+                opt = {
+                    inline_keyboard: [
+                    [{text:"جهت بررسی", url: "https://t.me/"+userBot+"?start="+projectId}],
+                    []              
+                ]
+                }
+            }
+            return opt;
+        }catch{
+
+        }
+    } ,
     createButtonPreview(projectId){
         //Create Button 
         var opts ={
@@ -149,6 +172,17 @@ var projectService = {
             })
         })
     }, 
+    findOne : function(projectId){
+        return new Promise((resolve,reject) => {
+            projectModel.findOne({
+                _id : projectId
+            }).then((project) => {
+                resolve(project);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
+    },
     updateFreelancerIdAndStatus: function(projectId,status,freelancerId){
         return new Promise((resolve,reject)=>{
            projectModel.findOneAndUpdate({
