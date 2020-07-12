@@ -379,30 +379,36 @@ var processTheMessage = function(chatId,message){
         //create menue chat bot 
         bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
       }else{
-        var taskId = message.split(" ")[1];  //pass taskId to get a task from db
-        freelancerService.findFreelancer(chatId).then((freelancer)=>{
-          //check user is Mojaz
-          if(freelancer.isMojaz){
-          //check point Score to get the project if under 100 Score can't take over 1 project
-          if(freelancer.point < 100){
-            if(freelancer.projects.length != 0){//means now have an active project
-            //send message you have an active project
-            bot.sendMessage(chatId , "شما در حال حاضر یک پروژه فعال در دست دارید.");
-            }else{ //have not any project
-            //send a request to Coworker to accept request 
-            requestFreelancer(taskId,chatId,freelancer);
+        if(message.startsWith("/start review")){
+          //SHOW IN REIVIEW 
+          bot.sendMessage(chatId,"جهت بررسی");
+        }else{
+          var taskId = message.split(" ")[1];  //pass taskId to get a task from db
+          freelancerService.findFreelancer(chatId).then((freelancer)=>{
+            //check user is Mojaz
+            if(freelancer.isMojaz){
+            //check point Score to get the project if under 100 Score can't take over 1 project
+            if(freelancer.point < 100){
+              if(freelancer.projects.length != 0){//means now have an active project
+              //send message you have an active project
+              bot.sendMessage(chatId , "شما در حال حاضر یک پروژه فعال در دست دارید.");
+              }else{ //have not any project
+              //send a request to Coworker to accept request 
+              requestFreelancer(taskId,chatId,freelancer);
+              }
+            }else{ //have enought point and get a new project
+              requestFreelancer(taskId,chatId,freelancer);
+              //should be assign a new project to freelancer
+  
+              //and finally send a message to freelancer
+  
             }
-          }else{ //have enought point and get a new project
-            requestFreelancer(taskId,chatId,freelancer);
-            //should be assign a new project to freelancer
-
-            //and finally send a message to freelancer
-
-          }
-          }else{ //is not Mojaz
-            bot.sendMessage(chatId , "شما مجاز به دریافت پروژه نمی باشید.");
-          }
-        });
+            }else{ //is not Mojaz
+              bot.sendMessage(chatId , "شما مجاز به دریافت پروژه نمی باشید.");
+            }
+          });
+        }
+      
 
 
         //after coWorker accept project will have been deleted from chanel

@@ -54,14 +54,14 @@ var projectService = {
             if(linkInfo != null){
                  opt = {
                     inline_keyboard: [
-                    [{text:"بیشتر" , url: linkInfo}, {text:"جهت بررسی", url: "https://t.me/"+userBot+"?start="+projectId}],
+                    [{text:"بیشتر" , url: linkInfo}, {text:"جهت بررسی", url: "https://t.me/"+userBot+"?start=review="+projectId}],
                     []              
                 ]
                 }
             }else{
                 opt = {
                     inline_keyboard: [
-                    [{text:"جهت بررسی", url: "https://t.me/"+userBot+"?start="+projectId}],
+                    [{text:"جهت بررسی", url: "https://t.me/"+userBot+"?start=review="+projectId}],
                     []              
                 ]
                 }
