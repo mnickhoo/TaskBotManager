@@ -380,6 +380,23 @@ var processTheMessage = function(chatId,message){
         bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
       }else{
         if(message.startsWith("/start review")){
+          var projectId = message.split("=")[1];
+          projectService.findOne(projectId).then((project)=>{
+            //run on project
+            var opts ={
+              inline_keyboard: [[{text : "کنسل" , callback_data : "CancellProject="+projectId},{text : "اتمام پروژه" , callback_data : "finishProject="+projectId}],[{text : "پروژه های من " , callback_data : "myProject"}]]    
+            };
+            // let chatIdUpdate = callbackQuery.message.chat.id;
+            // let messageId = callbackQuery.message.message_id;
+            let text = `پروژه: ${project.title} \n توضیحات: ${project.description}`;
+            // var markup = {
+            //   chat_id: callbackQuery.message.chat.id,
+            //   message_id: callbackQuery.message.message_id,
+            //   reply_markup: opts
+            // }
+            // console.log(project);
+            bot.sendMessage(chatId, text );
+          });
           //SHOW IN REIVIEW 
           bot.sendMessage(chatId,"جهت بررسی");
         }else{
