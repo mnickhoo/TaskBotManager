@@ -4,7 +4,7 @@ const chanel_id = process.env.chanel_id_Test ;
 const review_chanell = process.env.review_channel;
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
-const port = process.env.PORT_Test || 3000;
+const port = process.env.PORT || 3000;
 const {projectModel} = require('./model/projectModel');
 const {freelancerModel} = require('./model/freelancerModel');
 const projectService = require('./Services/ProjectService');
@@ -20,7 +20,7 @@ app.use(bodyParser.json());
 // const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 // const TelegramBot = require('node-telegram-bot-api');
 const TelegramBot = require('node-telegram-bot-api'); //use telegram API
-const TOKEN = process.env.TELEGRAM_TOKEN_Test || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
+const TOKEN = process.env.TELEGRAM_TOKEN || '1174993784:AAF88wKCuFIsEi2ctayhbuwzKsED6AO_csI';
 /* Remeber */
 
 const options = {
@@ -30,7 +30,7 @@ const options = {
   }
 };
 
-const urlConfig = process.env.APP_URL_Test || 'https://tranquil-inlet-79772.herokuapp.com/';
+const urlConfig = process.env.APP_URL || 'https://tranquil-inlet-79772.herokuapp.com/';
 // const urlConfig = "https://2614ea314925.ngrok.io";
 const bot = new TelegramBot(TOKEN, options);
 
@@ -49,7 +49,7 @@ bot.on('callback_query', (callbackQuery)=>{
     var projectId = callbackQuery.data.split("=")[1];//splite publish to get project Id
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
       let msg = projectService.SendToChannel(chanel_id , project);
-      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
+      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot);
       bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
       }).catch((err)=>{
@@ -139,7 +139,7 @@ bot.on('callback_query', (callbackQuery)=>{
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
       let msg = projectService.SendToChannel(chanel_id , project);
 
-      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
+      let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot);
       bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت کنسل شد" });
       }).catch((err)=>{
@@ -154,7 +154,7 @@ bot.on('callback_query', (callbackQuery)=>{
       //update project collection
       projectService.updateProjectStatus(projectId,ProjectStatus.REVIEW).then((project)=>{
         let msg = projectService.SendToChannel(review_chanell , project);
-        let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot_Test);
+        let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot);
         //send post to review channel
         bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
           bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
