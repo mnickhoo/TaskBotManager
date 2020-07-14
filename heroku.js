@@ -46,16 +46,14 @@ app.post(`/bot${TOKEN}`, (req, res) => {
 bot.on('callback_query', (callbackQuery)=>{
   //check the query data 
   if(callbackQuery.data.startsWith("publish")){//start with publish
-    var projectId = callbackQuery.data.split("=")[1];
-    //splite publish to get project Id
+    var projectId = callbackQuery.data.split("=")[1];//splite publish to get project Id
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
       let msg = projectService.SendToChannel(chanel_id , project);
-
       let opt = projectService.createButton(project.linkInfo,project._id, process.env.userBot_Test);
       bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
       }).catch((err)=>{
-        console.log(err);
+        bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "وادر ارسال پروژه با خطایی مواجعه شدیم" });
       })
     })
   }else if(callbackQuery.data.startsWith("accept")){//
@@ -66,51 +64,43 @@ bot.on('callback_query', (callbackQuery)=>{
     if(data.accept == "true"){
     //send a message to freelancer you can do it 
     projectService.findProject(projectId).then((project)=>{
-      project.status = "doing"; //change status project to doing
-      freelancerService.findAndUpdateFreelancer(freelancerId , {projectId : projectId , cowokerId : project.cowokerId  , status : "doing" , point : project.point , title : project.title}).then((result)=>{//find and assign task to freelancer
-          bot.sendMessage(freelancerId , `درخواست شما برای این پروژه با موفقیت قبول شد \n نام پروژه : ${project.title} \n توضیحات : ${project.description}`);
-          bot.sendMessage(freelancerId , `شما به مدت ${project.duration} روز زمان دارید.`);
-          projectService.updateFreelancerIdAndStatus(projectId , "doing" , freelancerId);
-        }) 
+      project.status = ProjectStatus.DOING; //change status project to doing
+      let task = {projectId : projectId , cowokerId : project.cowokerId  , status : ProjectStatus.DOING , point : project.point , title : project.title}
+      freelancerService.haveThisProject(callbackQuery.message.chat.id, projectId).then((result)=>{
+        if(result){
+          bot.sendMessage(callbackQuery.message.chat.id, "این پروژه به این فریلنسر داده شده است",mainMenue())
+        }else{ //you have this project
+          freelancerService.addProject(freelancerId , task ).then(()=>{//find and assign task to freelancer
+            bot.sendMessage(freelancerId , `درخواست شما برای این پروژه با موفقیت قبول شد \n نام پروژه : ${project.title} \n توضیحات : ${project.description}`);
+            bot.sendMessage(freelancerId , `شما به مدت ${project.duration} روز زمان دارید.`);
+            projectService.updateFreelancerIdAndStatus(projectId , "doing" , freelancerId).catch((err)=>{
+              console.log(err);
+            })
+          }).catch((err)=>{
+            console.log(err);
+          });
+        }
+      });
+
       });
     }else{
       //send a decline message to freelancer (
       projectService.findProject(projectId).then((project)=>{
         bot.sendMessage(freelancerId , `درخواست شما برای پروژه "${project.title}" توسط کارفرما رد شد.`);
       })
-    }
-    
-  }else if(callbackQuery.data.startsWith("projectId")){
+    } 
+  }else if(callbackQuery.data.startsWith("projectId")){ //Select project by user
     var projectId = callbackQuery.data.split("=")[1];
-    //find project and add status to done-review
     projectService.findOne(projectId).then((project)=>{
-      //run on project
       var opts ={
         inline_keyboard: [[{text : "کنسل" , callback_data : "CancellProject="+projectId},{text : "اتمام پروژه" , callback_data : "finishProject="+projectId}],[{text : "پروژه های من " , callback_data : "myProject"}]]    
       };
       let chatIdUpdate = callbackQuery.message.chat.id;
       let messageId = callbackQuery.message.message_id;
       let text = `پروژه: ${project.title} \n توضیحات: ${project.description}`;
-      // var markup = {
-      //   chat_id: callbackQuery.message.chat.id,
-      //   message_id: callbackQuery.message.message_id,
-      //   reply_markup: opts
-      // }
-      // console.log(project);
       editMessageText(chatIdUpdate, messageId , text , opts );
-      // bot.editMessageText(`پروژه: ${project.title} \n توضیحات: ${project.description}`, markup).then((response) => {
-      // }).catch((err)=>{
-      //   console.log(err);
-      // })
-
     })
-    //send post to review channel 
-
-    //send message to coworker
-
-   
-  }else if(callbackQuery.data == "myProject"){
-      //show project list 
+  }else if(callbackQuery.data == "myProject"){ //show list of projects
       freelancerService.findFreelancer(callbackQuery.from.id).then((freelancer)=>{
         if(freelancer.projects.length > 0){ // if freelancer have a project
           let inline_keyboards = [];
@@ -133,17 +123,17 @@ bot.on('callback_query', (callbackQuery)=>{
         let messageId = callbackQuery.message.message_id;
         let text = "پروژه های در حال انجام";
         editMessageText(chatIdUpdate , messageId , text , opts)
-        //  bot.sendMessage(chatId , "پروژه های در حال انجام", opts);
-
         }else{ //freelancer has not project
-          bot.sendMessage(chatId, "شما هیچ پروژه فعالی ندارید");
+          bot.sendMessage(chatId, "شما هیچ پروژه فعالی ندارید", mainMenue());
         }
       })
-  }else if(callbackQuery.data.startsWith("CancellProject")){
+  }else if(callbackQuery.data.startsWith("CancellProject")){//cancell project
     var projectId = callbackQuery.data.split("=")[1];
-    //cancell to project to todo 
+    //change project status to todo
+    projectService.updateProjectStatus(projectid,ProjectStatus.TODO).then((project)=>{
+      bot.sendMessage(chatid , "پروژه با موفقیت کنسل شد" , mainMenue());
 
-    //delete from freelancer
+      //delete project from freelancer
 
     //publish on chnnel
     projectService.findProject(projectId).then((project)=>{ //send task to channel 
@@ -156,25 +146,25 @@ bot.on('callback_query', (callbackQuery)=>{
         console.log(err);
       })
     })
-    bot.sendMessage(callbackQuery.from.id , "پروژه کنسل شد");
-  }else if(callbackQuery.data.startsWith("finishProject")){
+    })
+  }else if(callbackQuery.data.startsWith("finishProject")){ //when user press on finish button
     var projectId = callbackQuery.data.split("=")[1];
-    //add status to review
-
-    //send post to review channel
-    projectService.findProject(projectId).then((project)=>{ //send task to channel 
-      let msg = projectService.SendToChannel(review_chanell , project);
-
-      let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot_Test);
-      bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
-        bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
-      }).catch((err)=>{
-        console.log(err);
+    //change project status to review
+    freelancerService.updateProjectStatus(callbackQuery.message.chat.id,projectId,ProjectStatus.REVIEW).then(()=>{
+      //update project collection
+      projectService.updateProjectStatus(projectId,ProjectStatus.REVIEW).then((project)=>{
+        let msg = projectService.SendToChannel(review_chanell , project);
+        let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot_Test);
+        //send post to review channel
+        bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
+          bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
+          //send message to freelancer for review
+          bot.sendMessage(chatid , "در حال حاضر پروژه برای برررسی به مدیریت ارسال شد لطفا منتظر بمانید" , mainMenue());
+        }).catch((err)=>{
+          console.log(err);
+        })
       })
     })
-    //send message to freelancer for review
-
-
   }
   else{//go to switch
     switch(callbackQuery.data){
@@ -377,7 +367,7 @@ var processTheMessage = function(chatId,message){
     if(message.startsWith("/start")){
       if(message.indexOf(" ") == -1){
         //create menue chat bot 
-        bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)")
+        bot.sendMessage(chatId , "به ربات مدیریت پروژه خوش آمدید :)" , mainMenue() )
       }else{
         if(message.startsWith("/start review")){
           var projectId = message.split("=")[1];
@@ -408,7 +398,7 @@ var processTheMessage = function(chatId,message){
             if(freelancer.point < 100){
               if(freelancer.projects.length != 0){//means now have an active project
               //send message you have an active project
-              bot.sendMessage(chatId , "شما در حال حاضر یک پروژه فعال در دست دارید.");
+              bot.sendMessage(chatId , "شما در حال حاضر یک پروژه فعال در دست دارید." , mainMenue());
               }else{ //have not any project
               //send a request to Coworker to accept request 
               requestFreelancer(taskId,chatId,freelancer);
@@ -421,7 +411,7 @@ var processTheMessage = function(chatId,message){
   
             }
             }else{ //is not Mojaz
-              bot.sendMessage(chatId , "شما مجاز به دریافت پروژه نمی باشید.");
+              bot.sendMessage(chatId , "شما مجاز به دریافت پروژه نمی باشید.",mainMenue());
             }
           });
         }
@@ -444,7 +434,7 @@ var processTheMessage = function(chatId,message){
         case "/cancell":
           //set null to last command
           freelancerService.updateLastCommmand(chatId,null).then((freelacer)=>{
-            bot.sendMessage(chatId, "تمامی دستورات لغو شد!")
+            bot.sendMessage(chatId, "تمامی دستورات لغو شد!",mainMenue())
           })
           break;
         case "/create":
@@ -453,7 +443,7 @@ var processTheMessage = function(chatId,message){
           })
           break;
         default:
-          bot.sendMessage(chatId , "دستور تعریف نشده!");
+          bot.sendMessage(chatId , "دستور تعریف نشده!",mainMenue());
       }
     }
   }else{//message not command
@@ -483,7 +473,7 @@ var processTheMessage = function(chatId,message){
          bot.sendMessage(chatId , "پروژه های در حال انجام", opts);
 
         }else{ //freelancer has not project
-          bot.sendMessage(chatId, "شما هیچ پروژه فعالی ندارید");
+          bot.sendMessage(chatId, "شما هیچ پروژه فعالی ندارید",mainMenue());
         }
       })
     break;
@@ -512,15 +502,15 @@ function requestFreelancer(taskId,chatId,freelancer){
   //send a request to Coworker to accept request 
   projectService.findProject(taskId).then((project)=>{
     //check project freelancerId isn't null and status == doing || project has been assigne to other!
-    if(project.freelancerId != null && project.status == "doing"){
-      bot.sendMessage(chatId, "متاسفانه این پروژه توسط فریلنسر دگیری در حال انجام است :(");
-    }else if(project.status == "todo"){
+    if(project.freelancerId != null && project.status == ProjectStatus.DOING){
+      bot.sendMessage(chatId, "متاسفانه این پروژه توسط فریلنسر دگیری در حال انجام است :(", mainMenue());
+    }else if(project.status == ProjectStatus.TODO){
     //send freelancer chat Id and project Id 
    let opt = projectService.createButtonAcceptRequest(chatId , project._id);
    //send message to coworker
    bot.sendMessage(project.cowokerId , `کاربر درخواست انجام پروژه شما را دارد \n کاربر : ${freelancer.name} \n نام پروژه : ${project.title} `, opt);
    //send a message to freelancer
-   bot.sendMessage(chatId, "درخواست شما برای کارفرما ارسال شد لطفا منتظر بمانید");
+   bot.sendMessage(chatId, "درخواست شما برای کارفرما ارسال شد لطفا منتظر بمانید" , mainMenue());
     }     
   });
 }
@@ -563,4 +553,11 @@ function editMessageText(chatId , messageId , text, opts , ){
       reject(err);
     })
   })
+}
+
+const ProjectStatus = {
+  TODO : "todo",
+  DOING : "doing",
+  REVIEW : "review",
+  REJECT : "reject"
 }

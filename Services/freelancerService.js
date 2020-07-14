@@ -53,7 +53,7 @@ var freelancerService = {
     findAndUpdateFreelancer : function(chatId , task){
         return new Promise((resolve , reject) => {
             freelancerModel.findOneAndUpdate({
-                chatId : chatId
+                chatId : chatId,
             } , {projects : task} , {new : true}).then((freelancer) => {
                 //write somthing here
                 resolve(freelancer) ;
@@ -62,6 +62,19 @@ var freelancerService = {
             })  
         })
     }, 
+    addProject :  function(chatId , task){
+        return new Promise((resolve , reject)=>{
+            freelancerModel.update({
+                chatId : chatId
+            }, {
+                $push : {projects : task}
+            }).then((project)=>{
+                resolve(task);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
+    },
     hasLastCommand : function(chatId){
         return new Promise((resolve, reject)=>{
             freelancerModel.findOne({
@@ -179,6 +192,36 @@ var freelancerService = {
            result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return "user"+result;
+     },
+     updateProjectStatus : function(chatId , projectId , status){
+         return new Promise((resolve , reject)=>{
+             freelancerModel.findOneAndUpdate({
+                chatId : chatId,
+                "projects.projectId" : projectId
+             },{
+                 $set : {"projects.$.status" : status}
+             }).then((project)=>{
+                 resolve(project);
+             }).catch((err)=>{
+                 reject(err);
+             })
+         })
+     },
+     haveThisProject : function(chatId , projectId){
+         return new Promise((resolve , reject)=>{
+             freelancerModel.findOne({
+                 chatId : chatId , 
+             }).then((freelancer)=>{
+                 let result = false;
+                 //should be return a boolean value
+                 freelancer.projects.forEach(project => {
+                     if(project.projectId == projectId){
+                         result = true; 
+                     }
+                 });
+                 resolve(result);
+             })
+         })
      }
 
 }

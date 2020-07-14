@@ -5,6 +5,7 @@ const mongoose = require('../db/mongoose');
 const freelancerModel = require('../model/freelancerModel');
 const {projectModel} = require('../model/projectModel');
 const { promises } = require('fs');
+const { rejects } = require('assert');
 
 const token = process.env.TELEGRAM_TOKEN //Set Token
 var chanel_id = process.env.CHANEL_ID ; 
@@ -192,6 +193,19 @@ var projectService = {
            }).then((project)=>{
                resolve(project);
            })
+        })
+    },
+    updateProjectStatus : function(projectId , status){
+        return new Promise((resolve , reject)=> {
+            projectModel.findOneAndUpdate({
+                _id : projectId
+            },{
+                $set : {status : status}
+            }).then((project)=>{
+                resolve(project);
+            }).catch((err)=>{
+                reject(err);
+            })
         })
     }
 }
