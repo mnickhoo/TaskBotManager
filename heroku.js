@@ -156,7 +156,7 @@ bot.on('callback_query', (callbackQuery)=>{
     freelancerService.updateLastProjectId(callbackQuery.message.chat.id, projectId).then((freelancer)=>{
       freelancerService.updateLastCommmand(callbackQuery.message.chat.id ,"/addNote").then(()=>{
       //send message that send me a Note about project
-      bot.sendMessage(callbackQuery.message.chat.id , "لطفا درباره پروژه توضیح دهید تا برای بررسی سمت کارفرما ارسال شود.");
+      bot.sendMessage(callbackQuery.message.chat.id , "توضیحات لازم رو برای ما ارسال کنید تا پروژه بررسی شود." , removeKeyboard());
       })
     })
   }
@@ -344,7 +344,7 @@ bot.on('message', msg => {
                         resize_keyboard : true
                         }
                       }
-                      bot.sendMessage(chatid, "پیام شما دریافت شد با زدن دکمه ثبت نظر پروژه را به اتمام برسانید" , keyboard);
+                      bot.sendMessage(chatId, "پیام شما دریافت شد با زدن دکمه ثبت نظر پروژه را به اتمام برسانید" , keyboard);
                       })
 
                     })
