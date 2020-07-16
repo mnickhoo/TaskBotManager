@@ -410,7 +410,7 @@ var processTheMessage = function(chatId,message){
             };
             // let chatIdUpdate = callbackQuery.message.chat.id;
             // let messageId = callbackQuery.message.message_id;
-            let text = `پروژه: ${project.title} \n توضیحات: ${project.description}`;
+            let text = `پروژه: ${project.title} \n توضیحات: ${project.description} \n توضیحات فریلنسر: ${project.note}`;
             // var markup = {
             //   chat_id: callbackQuery.message.chat.id,
             //   message_id: callbackQuery.message.message_id,
