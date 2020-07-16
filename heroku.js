@@ -205,7 +205,9 @@ bot.on('message', msg => {
                     bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
                       // bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
                       //send message to freelancer for review
-                      bot.sendMessage(chatId , "در حال حاضر پروژه برای برررسی به مدیریت ارسال شد لطفا منتظر بمانید" , mainMenue());
+                      freelancerService.updateLastCommmand(chatId , null).then(()=>{
+                        bot.sendMessage(chatId , "در حال حاضر پروژه برای برررسی به مدیریت ارسال شد لطفا منتظر بمانید" , mainMenue());
+                      })
                     }).catch((err)=>{
                       console.log(err);
                     })
