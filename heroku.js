@@ -153,28 +153,12 @@ bot.on('callback_query', (callbackQuery)=>{
   }else if(callbackQuery.data.startsWith("finishProject")){ //when user press on finish button
     var projectId = callbackQuery.data.split("=")[1];
     //add projectId to lastCreated
-    freelancerService.updateLastProjectId(callbackQuery.message.chat.id, projectId);
-    //send message that send me a Note about project
-    freelancerService.updateLastCommmand(callbackQuery.message.chat.id ,"/addNote"); //update last Command
-    bot.sendMessage(callbackQuery.message.chat.id , "لطفا درباره پروژه توضیح دهید تا برای بررسی سمت کارفرما ارسال شود." , keyboard);
-
-
-    // //change project status to review
-    // freelancerService.updateProjectStatus(callbackQuery.message.chat.id,projectId,ProjectStatus.REVIEW).then(()=>{
-    //   //update project collection
-    //   projectService.updateProjectStatus(projectId,ProjectStatus.REVIEW).then((project)=>{
-    //     let msg = projectService.SendToChannel(review_chanell , project);
-    //     let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot);
-    //     //send post to review channel
-    //     bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
-    //       bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
-    //       //send message to freelancer for review
-    //       bot.sendMessage(chatid , "در حال حاضر پروژه برای برررسی به مدیریت ارسال شد لطفا منتظر بمانید" , mainMenue());
-    //     }).catch((err)=>{
-    //       console.log(err);
-    //     })
-    //   })
-    // })
+    freelancerService.updateLastProjectId(callbackQuery.message.chat.id, projectId).then((freelancer)=>{
+      freelancerService.updateLastCommmand(callbackQuery.message.chat.id ,"/addNote").then(()=>{
+      //send message that send me a Note about project
+      bot.sendMessage(callbackQuery.message.chat.id , "لطفا درباره پروژه توضیح دهید تا برای بررسی سمت کارفرما ارسال شود.");
+      })
+    })
   }
   else{//go to switch
     switch(callbackQuery.data){
