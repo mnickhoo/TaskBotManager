@@ -107,8 +107,10 @@ bot.on('callback_query', (callbackQuery)=>{
           let inline_keyboards = [];
           let keyboard ; 
           freelancer.projects.forEach((project)=>{
-            keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
-            inline_keyboards.push(keyboard);
+            if(project.status == ProjectStatus.DOING){
+              keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
+              inline_keyboards.push(keyboard);
+            }
           })
           inline_keyboards.push([]);
         //   var opts ={
@@ -462,8 +464,10 @@ var processTheMessage = function(chatId,message){
           let inline_keyboards = [];
           let keyboard ; 
           freelancer.projects.forEach((project)=>{
-            keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
-            inline_keyboards.push(keyboard);
+            if(project.status == ProjectStatus.DOING){
+              keyboard = [{text : project.title , callback_data : "projectId="+project.projectId}]
+              inline_keyboards.push(keyboard);
+            }
           })
           inline_keyboards.push([]);
           var opts ={
@@ -504,7 +508,7 @@ function requestFreelancer(taskId,chatId,freelancer){
   projectService.findProject(taskId).then((project)=>{
     //check project freelancerId isn't null and status == doing || project has been assigne to other!
     if(project.freelancerId != null && project.status == ProjectStatus.DOING){
-      bot.sendMessage(chatId, "متاسفانه این پروژه توسط فریلنسر دگیری در حال انجام است :(", mainMenue());
+      bot.sendMessage(chatId, "متاسفانه این پروژه توسط فریلنسر دیگری در حال انجام است :(", mainMenue());
     }else if(project.status == ProjectStatus.TODO){
     //send freelancer chat Id and project Id 
    let opt = projectService.createButtonAcceptRequest(chatId , project._id);
