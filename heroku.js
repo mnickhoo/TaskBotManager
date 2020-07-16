@@ -54,6 +54,7 @@ bot.on('callback_query', (callbackQuery)=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه با موفقیت در کانال ارسال شد" });
       }).catch((err)=>{
         bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "وادر ارسال پروژه با خطایی مواجعه شدیم" });
+        bot.sendMessage(callbackQuery.message.chat.id , err.message);
       })
     })
   }else if(callbackQuery.data.startsWith("accept")){//
@@ -73,7 +74,7 @@ bot.on('callback_query', (callbackQuery)=>{
           freelancerService.addProject(freelancerId , task ).then(()=>{//find and assign task to freelancer
             bot.sendMessage(freelancerId , `درخواست شما برای این پروژه با موفقیت قبول شد \n نام پروژه : ${project.title} \n توضیحات : ${project.description}`);
             bot.sendMessage(freelancerId , `شما به مدت ${project.duration} روز زمان دارید.`);
-            projectService.updateFreelancerIdAndStatus(projectId , "doing" , freelancerId).catch((err)=>{
+            projectService.updateFreelancerIdAndStatus(projectId , ProjectStatus.DOING , freelancerId).catch((err)=>{
               console.log(err);
             })
           }).catch((err)=>{
