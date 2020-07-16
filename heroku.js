@@ -203,7 +203,7 @@ bot.on('message', msg => {
                     let opt = projectService.createButtonReview(project.linkInfo,project._id, process.env.userBot);
                     //send post to review channel
                     bot.sendPhoto(msg.chanel_id,"https://educationaldistress.eu/erasmus/media/com_projectfork/projectfork/images/icons/project-placeholder.png" , {caption : msg.text , reply_markup : opt}).then(()=>{
-                      bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
+                      // bot.answerCallbackQuery(callbackQuery.id, { show_alert : true , text : "پروژه برای بررسی ارسال شد" });
                       //send message to freelancer for review
                       bot.sendMessage(chatid , "در حال حاضر پروژه برای برررسی به مدیریت ارسال شد لطفا منتظر بمانید" , mainMenue());
                     }).catch((err)=>{
