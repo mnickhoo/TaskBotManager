@@ -42,6 +42,10 @@ let projectModel = mongoose.model('project' , {
     postId : {
         type : String,
         default : null
+    },
+    note : {
+        type : String,
+        default : null
     }
 })
 

@@ -100,6 +100,17 @@ var freelancerService = {
             })
         });
     },
+    getLastProjectId : function(chatId){
+        return new Promise((resolve , reject)=>{
+            freelancerModel.findOne({
+                chatId  : chatId
+            }).then((freelancer)=>{
+                resolve(freelancer.lastCreatedProject);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
+    },
     updateEmail : function(chatId,email){
         return new Promise((resolve,reject)=>{
             freelancerModel.findOneAndUpdate({

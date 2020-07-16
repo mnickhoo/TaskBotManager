@@ -207,6 +207,19 @@ var projectService = {
                 reject(err);
             })
         })
+    },
+    updateProjectNote : function(projectId , text){
+        return new Promise((resolve , reject)=>{
+            projectModel.findOneAndUpdate({
+                _id : projectId
+            },{
+                $set : {note : text}
+            }).then((project)=>{
+                resolve(project);
+            }).catch((err)=>{
+                reject(err);
+            })
+        })
     }
 }
 
