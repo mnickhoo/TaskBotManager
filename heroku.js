@@ -1,6 +1,6 @@
 require('dotenv/config');
 const mongoose = require('./db/mongoose'); //we use mongoose CONFIGURATION
-const chanel_id = process.env.chanel_id_Test ; 
+const chanel_id = process.env.chanel_id ; 
 const review_chanell = process.env.review_channel;
 const express = require('express'); //we use express module
 const bodyParser = require('body-parser');
